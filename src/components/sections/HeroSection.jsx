@@ -246,7 +246,7 @@ export function HeroSection() {
             className="hero-gif-field relative mx-auto flex w-full max-w-[320px] cursor-pointer items-center justify-center bg-transparent sm:max-w-[420px] md:max-w-[520px] lg:max-w-[720px]"
           >
             <img
-              src="/assets/coding.gif"
+              src="/assets/projects/coding.gif"
               alt="Frontend development illustration"
               className="hero-gif-image relative z-10 w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"
             />

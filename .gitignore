@@ -41,9 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 # Ignore file aset pribadi
-public/assets/*
-!public/assets/
-!public/assets/*/
 !public/assets/.gitkeep
 !public/assets/**/.gitkeep
 public/assets/projects/*
