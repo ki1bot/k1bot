@@ -39,13 +39,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Ignore file aset pribadi
-!public/assets/.gitkeep
-!public/assets/**/.gitkeep
-public/assets/projects/*
-public/assets/projects/
-public/assets/projects/.gitkeep
-public/sertifikat/*
-!public/sertifikat/
-!public/sertifikat/.gitkeep
