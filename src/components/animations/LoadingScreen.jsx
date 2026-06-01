@@ -2,20 +2,22 @@
 
 import { useEffect, useState } from "react";
 
+import { assetUrl } from "@/lib/supabase-storage";
+
 const loadingIcons = [
   {
     label: "HTML",
-    src: "/assets/screen/html.png",
+    src: assetUrl("screen/html.png"),
     delay: "0ms",
   },
   {
     label: "Profile",
-    src: "/assets/screen/profile.png",
+    src: assetUrl("screen/profile.png"),
     delay: "140ms",
   },
   {
     label: "Github",
-    src: "/assets/screen/github.png",
+    src: assetUrl("screen/github.png"),
     delay: "280ms",
   },
 ];

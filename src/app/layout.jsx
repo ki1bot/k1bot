@@ -2,6 +2,7 @@ import "./globals.css";
 
 import { LoadingScreen } from "@/components/animations/LoadingScreen";
 import { ReloadToHome } from "@/components/animations/ReloadToHome";
+import { assetUrl } from "@/lib/supabase-storage";
 
 export const metadata = {
   title: "Rifqi | Software Engineer",
@@ -10,19 +11,19 @@ export const metadata = {
   icons: {
     icon: [
       {
-        url: "/assets/logoKibot.png",
+        url: assetUrl("assets/logoKibot.png"),
         type: "image/png",
       },
     ],
     shortcut: [
       {
-        url: "/assets/logoKibot.png",
+        url: assetUrl("assets/logoKibot.png"),
         type: "image/png",
       },
     ],
     apple: [
       {
-        url: "/assets/logoKibot.png",
+        url: assetUrl("assets/logoKibot.png"),
         type: "image/png",
       },
     ],
@@ -40,7 +41,13 @@ export default function RootLayout({ children }) {
       data-scroll-behavior="smooth"
       className="portfolio-is-loading"
     >
-      <body>
+      <body
+        style={{
+          "--portfolio-gradient-blue-image": `url("${assetUrl(
+            "assets/gradient-blue.jpg",
+          )}")`,
+        }}
+      >
         <ReloadToHome />
         <LoadingScreen />
         {children}

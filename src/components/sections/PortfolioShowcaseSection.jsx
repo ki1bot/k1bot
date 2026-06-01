@@ -1,5 +1,6 @@
 "use client";
 
+import { assetUrl } from "@/lib/supabase-storage";
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
@@ -222,7 +223,7 @@ function ProjectDetailOverlay({ project, onBack }) {
                       className="video-hover-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-6 text-sm font-bold text-fuchsia-100 shadow-xl shadow-blue-950/20 min-[430px]:w-auto sm:h-14 sm:min-w-32 sm:px-7"
                     >
                       <img
-                        src="/assets/media/github.png"
+                        src={assetUrl("media/github.png")}
                         alt="GitHub"
                         loading="lazy"
                         decoding="async"

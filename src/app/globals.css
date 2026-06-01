@@ -73,7 +73,7 @@ body {
   background-color: #020617;
   background-image:
     linear-gradient(180deg, rgba(2, 6, 23, 0.08), rgba(2, 6, 23, 0.92)),
-    url("/assets/gradient-blue.jpg");
+    var(--portfolio-gradient-blue-image);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircleMore, Share2 } from "lucide-react";
 
 import { PERSONAL_INFO } from "@/lib/constants";
+import { assetUrl } from "@/lib/supabase-storage";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { ContactMessageForm } from "@/components/forms/ContactMessageForm";
 import { CommentForm } from "@/components/forms/CommentForm";
@@ -14,37 +15,37 @@ const socialLinks = [
     title: "LinkedIn",
     subtitle: "Rifqi Susanto",
     href: PERSONAL_INFO.linkedin,
-    image: "/assets/media/linkedin.png",
+    image: assetUrl("media/linkedin.png"),
   },
   {
     title: "GitHub",
     subtitle: "@ki1bot",
     href: PERSONAL_INFO.github,
-    image: "/assets/media/github.png",
+    image: assetUrl("media/github.png"),
   },
   {
     title: "Instagram",
     subtitle: "@ki1bot_",
     href: PERSONAL_INFO.instagram,
-    image: "/assets/media/instagram.png",
+    image: assetUrl("media/instagram.png"),
   },
   {
     title: "YouTube",
     subtitle: "@kibot7659",
     href: PERSONAL_INFO.youtube,
-    image: "/assets/media/youtube.png",
+    image: assetUrl("media/youtube.png"),
   },
   {
     title: "Spotify",
     subtitle: "kibot",
     href: PERSONAL_INFO.spotify,
-    image: "/assets/media/Spotify.png",
+    image: assetUrl("media/Spotify.png"),
   },
   {
     title: "TikTok",
     subtitle: "@kiibott_",
     href: PERSONAL_INFO.tiktok,
-    image: "/assets/media/tiktok.png",
+    image: assetUrl("media/tiktok.png"),
   },
 ];
 

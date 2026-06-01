@@ -1,13 +1,4 @@
-const SUPABASE_ASSET_BASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_ASSET_BASE_URL || "";
-
-const assetUrl = (path) => {
-  if (!SUPABASE_ASSET_BASE_URL) {
-    return "";
-  }
-
-  return `${SUPABASE_ASSET_BASE_URL}/${path}`;
-};
+import { assetUrl } from "@/lib/supabase-storage";
 
 export const PERSONAL_INFO = {
   name: "Rifqi",
@@ -24,209 +15,42 @@ export const PERSONAL_INFO = {
   youtube: "https://www.youtube.com/@kibot7659",
   tiktok: "https://www.tiktok.com/@kiibott_?_r=1&_t=ZS-96Aalc9CrbQ",
 
-  profileImage: "/assets/default-avatar.jpg",
+  profileImage: assetUrl("assets/default-avatar.jpg"),
   description:
     "Saya membangun website modern, responsif, dan terstruktur menggunakan React, Next.js, Tailwind CSS, Shadcn, dan Supabase.",
 };
 
-export const STATS = [
-  {
-    value: "10+",
-    label: "Projects",
-    description: "Project latihan dan pengembangan web.",
-  },
-  {
-    value: "9",
-    label: "Tech Stack",
-    description: "Teknologi frontend dan backend pendukung.",
-  },
-  {
-    value: "6+",
-    label: "Certificates",
-    description: "Sertifikat dan pencapaian belajar.",
-  },
-  {
-    value: "100%",
-    label: "Responsive",
-    description: "Tampilan disiapkan untuk desktop dan mobile.",
-  },
-];
-
 export const TECH_STACK = [
-  {
-    name: "HTML",
-    icon: assetUrl("techstack/html.svg"),
-  },
-  {
-    name: "CSS",
-    icon: assetUrl("techstack/css.svg"),
-  },
-  {
-    name: "JavaScript",
-    icon: assetUrl("techstack/javascript.svg"),
-  },
-  {
-    name: "TypeScript",
-    icon: assetUrl("techstack/typescript.png"),
-  },
-  {
-    name: "Tailwind CSS",
-    icon: assetUrl("techstack/tailwind.svg"),
-  },
-  {
-    name: "Bootstrap",
-    icon: assetUrl("techstack/bootstrap.svg"),
-  },
-  {
-    name: "Node.js",
-    icon: assetUrl("techstack/nodejs.svg"),
-  },
-  {
-    name: "Vite",
-    icon: assetUrl("techstack/vite.svg"),
-  },
-  {
-    name: "React",
-    icon: assetUrl("techstack/reactjs.svg"),
-  },
-  {
-    name: "Next.js",
-    icon: assetUrl("techstack/nextjs.png"),
-  },
-  {
-    name: "NestJS",
-    icon: assetUrl("techstack/nestjs.png"),
-  },
-  {
-    name: "Express.js",
-    icon: assetUrl("techstack/expressjs.png"),
-  },
-  {
-    name: "PHP",
-    icon: assetUrl("techstack/php.png"),
-  },
-  {
-    name: "Laravel",
-    icon: assetUrl("techstack/laravel.png"),
-  },
-  {
-    name: "Java",
-    icon: assetUrl("techstack/java.png"),
-  },
-  {
-    name: "Dart",
-    icon: assetUrl("techstack/dart.png"),
-  },
-  {
-    name: "Flutter",
-    icon: assetUrl("techstack/flutter.png"),
-  },
-  {
-    name: "Golang",
-    icon: assetUrl("techstack/golang.png"),
-  },
-  {
-    name: "Python",
-    icon: assetUrl("techstack/python.png"),
-  },
-  {
-    name: "C++",
-    icon: assetUrl("techstack/c%2B%2B.png"),
-  },
-  {
-    name: "Firebase",
-    icon: assetUrl("techstack/firebase.svg"),
-  },
-  {
-    name: "Supabase",
-    icon: assetUrl("techstack/supabase.png"),
-  },
-  {
-    name: "MySQL",
-    icon: assetUrl("techstack/mysql.png"),
-  },
-  {
-    name: "PostgreSQL",
-    icon: assetUrl("techstack/postgresql.png"),
-  },
-  {
-    name: "MongoDB",
-    icon: assetUrl("techstack/mongodb.png"),
-  },
-  {
-    name: "Prisma",
-    icon: assetUrl("techstack/prismaorm.png"),
-  },
-  {
-    name: "Docker",
-    icon: assetUrl("techstack/docker.png"),
-  },
-  {
-    name: "Vercel",
-    icon: assetUrl("techstack/vercel.svg"),
-  },
-  {
-    name: "Figma",
-    icon: assetUrl("techstack/figma.png"),
-  },
-  {
-    name: "Linux",
-    icon: assetUrl("techstack/linux.png"),
-  },
-];
-
-export const SERVICES = [
-  {
-    title: "Frontend Development",
-    description:
-      "Membangun tampilan website responsif, modern, dan mudah digunakan menggunakan React, Next.js, dan Tailwind CSS.",
-  },
-  {
-    title: "Portfolio Website",
-    description:
-      "Membuat website portofolio pribadi yang rapi, profesional, dan siap digunakan untuk internship atau freelance.",
-  },
-  {
-    title: "Database Integration",
-    description:
-      "Menghubungkan website dengan Supabase untuk menampilkan project, sertifikat, dan komentar secara dinamis.",
-  },
-  {
-    title: "UI Implementation",
-    description:
-      "Mengubah desain menjadi komponen React yang reusable, bersih, dan mudah dikembangkan.",
-  },
-];
-
-export const EXPERIENCES = [
-  {
-    year: "2026",
-    title: "Personal Portfolio Website",
-    description:
-      "Membangun website portofolio pribadi menggunakan Next.js, React, Supabase, Tailwind CSS, dan Shadcn.",
-  },
-  {
-    year: "2025",
-    title: "Frontend Learning Projects",
-    description:
-      "Mengerjakan berbagai project latihan untuk memperkuat pemahaman HTML, CSS, JavaScript, React, dan deployment.",
-  },
-  {
-    year: "2024",
-    title: "Sistem Informasi Student",
-    description:
-      "Mempelajari dasar pemrograman, basis data, analisis sistem, dan pengembangan aplikasi berbasis web.",
-  },
-];
-
-export const PROJECT_CATEGORIES = [
-  "All",
-  "Next.js",
-  "React",
-  "JavaScript",
-  "Tailwind CSS",
-  "Database",
-  "Dashboard",
+  { name: "HTML", icon: assetUrl("techstack/html.svg") },
+  { name: "CSS", icon: assetUrl("techstack/css.svg") },
+  { name: "JavaScript", icon: assetUrl("techstack/javascript.svg") },
+  { name: "TypeScript", icon: assetUrl("techstack/typescript.png") },
+  { name: "Tailwind CSS", icon: assetUrl("techstack/tailwind.svg") },
+  { name: "Bootstrap", icon: assetUrl("techstack/bootstrap.svg") },
+  { name: "Node.js", icon: assetUrl("techstack/nodejs.svg") },
+  { name: "Vite", icon: assetUrl("techstack/vite.svg") },
+  { name: "React", icon: assetUrl("techstack/reactjs.svg") },
+  { name: "Next.js", icon: assetUrl("techstack/nextjs.png") },
+  { name: "NestJS", icon: assetUrl("techstack/nestjs.png") },
+  { name: "Express.js", icon: assetUrl("techstack/expressjs.png") },
+  { name: "PHP", icon: assetUrl("techstack/php.png") },
+  { name: "Laravel", icon: assetUrl("techstack/laravel.png") },
+  { name: "Java", icon: assetUrl("techstack/java.png") },
+  { name: "Dart", icon: assetUrl("techstack/dart.png") },
+  { name: "Flutter", icon: assetUrl("techstack/flutter.png") },
+  { name: "Golang", icon: assetUrl("techstack/golang.png") },
+  { name: "Python", icon: assetUrl("techstack/python.png") },
+  { name: "C++", icon: assetUrl("techstack/c++.png") },
+  { name: "Firebase", icon: assetUrl("techstack/firebase.svg") },
+  { name: "Supabase", icon: assetUrl("techstack/supabase.png") },
+  { name: "MySQL", icon: assetUrl("techstack/mysql.png") },
+  { name: "PostgreSQL", icon: assetUrl("techstack/postgresql.png") },
+  { name: "MongoDB", icon: assetUrl("techstack/mongodb.png") },
+  { name: "Prisma", icon: assetUrl("techstack/prismaorm.png") },
+  { name: "Docker", icon: assetUrl("techstack/docker.png") },
+  { name: "Vercel", icon: assetUrl("techstack/vercel.svg") },
+  { name: "Figma", icon: assetUrl("techstack/figma.png") },
+  { name: "Linux", icon: assetUrl("techstack/linux.png") },
 ];
 
 export const FALLBACK_PROJECTS = [
@@ -408,7 +232,7 @@ export const FALLBACK_COMMENTS = [
     id: "fallback-pinned-comment",
     user_name: "Rifqi",
     content: "Halo, terima kasih sudah mampir ke portofolio saya.",
-    profile_image: "/assets/default-avatar.jpg",
+    profile_image: assetUrl("assets/default-avatar.jpg"),
     is_pinned: true,
     created_at: "2026-01-01T00:00:00.000Z",
   },
@@ -416,7 +240,7 @@ export const FALLBACK_COMMENTS = [
     id: "fallback-guest-comment",
     user_name: "Guest",
     content: "Portofolionya rapi, modern, dan mudah dipahami.",
-    profile_image: "/assets/default-avatar.jpg",
+    profile_image: assetUrl("assets/default-avatar.jpg"),
     is_pinned: false,
     created_at: "2026-01-02T00:00:00.000Z",
   },

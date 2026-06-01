@@ -4,16 +4,7 @@ import { useEffect, useState } from "react";
 import { ExternalLink, Mail, Sparkles } from "lucide-react";
 
 import { PERSONAL_INFO } from "@/lib/constants";
-
-const SUPABASE_ASSET_BASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_ASSET_BASE_URL || "";
-
-const assetUrl = (path) => {
-  const cleanBaseUrl = SUPABASE_ASSET_BASE_URL.replace(/\/$/, "");
-  const cleanPath = path.replace(/^\//, "");
-
-  return `${cleanBaseUrl}/${cleanPath}`;
-};
+import { assetUrl } from "@/lib/supabase-storage";
 
 const heroStacks = ["React", "JavaScript", "Node.js", "Tailwind"];
 
