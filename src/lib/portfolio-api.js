@@ -4,10 +4,53 @@ import {
   FALLBACK_COMMENTS,
   FALLBACK_PROJECTS,
 } from "@/lib/constants";
+import {
+  createPdfUrlFromImageUrl,
+  resolveAssetUrl,
+} from "@/lib/supabase-storage";
+
+function normalizeProject(project) {
+  return {
+    ...project,
+    img: resolveAssetUrl(project.img),
+  };
+}
+
+function normalizeCertificate(certificate) {
+  const normalizedImageUrl = resolveAssetUrl(certificate.img);
+  const normalizedPdfUrl = certificate.pdf_url
+    ? resolveAssetUrl(certificate.pdf_url)
+    : createPdfUrlFromImageUrl(certificate.img);
+
+  return {
+    ...certificate,
+    img: normalizedImageUrl,
+    pdf_url: normalizedPdfUrl,
+  };
+}
+
+function normalizeComment(comment) {
+  return {
+    ...comment,
+    profile_image: resolveAssetUrl(comment.profile_image),
+  };
+}
+
+function normalizeProjects(projects) {
+  return projects.map(normalizeProject);
+}
+
+function normalizeCertificates(certificates) {
+  return certificates.map(normalizeCertificate);
+}
+
+function normalizeComments(comments) {
+  return comments.map(normalizeComment);
+}
 
 export async function getProjects() {
   if (!isSupabaseConfigured || !supabase) {
-    return FALLBACK_PROJECTS;
+    return normalizeProjects(FALLBACK_PROJECTS);
   }
 
   const { data, error } = await supabase
@@ -21,15 +64,17 @@ export async function getProjects() {
 
   if (error) {
     console.error("Failed to fetch projects:", error.message);
-    return FALLBACK_PROJECTS;
+    return normalizeProjects(FALLBACK_PROJECTS);
   }
 
-  return data?.length ? data : FALLBACK_PROJECTS;
+  return data?.length
+    ? normalizeProjects(data)
+    : normalizeProjects(FALLBACK_PROJECTS);
 }
 
 export async function getCertificates() {
   if (!isSupabaseConfigured || !supabase) {
-    return FALLBACK_CERTIFICATES;
+    return normalizeCertificates(FALLBACK_CERTIFICATES);
   }
 
   const { data, error } = await supabase
@@ -40,15 +85,17 @@ export async function getCertificates() {
 
   if (error) {
     console.error("Failed to fetch certificates:", error.message);
-    return FALLBACK_CERTIFICATES;
+    return normalizeCertificates(FALLBACK_CERTIFICATES);
   }
 
-  return data?.length ? data : FALLBACK_CERTIFICATES;
+  return data?.length
+    ? normalizeCertificates(data)
+    : normalizeCertificates(FALLBACK_CERTIFICATES);
 }
 
 export async function getComments() {
   if (!isSupabaseConfigured || !supabase) {
-    return FALLBACK_COMMENTS;
+    return normalizeComments(FALLBACK_COMMENTS);
   }
 
   const { data, error } = await supabase
@@ -59,10 +106,12 @@ export async function getComments() {
 
   if (error) {
     console.error("Failed to fetch comments:", error.message);
-    return FALLBACK_COMMENTS;
+    return normalizeComments(FALLBACK_COMMENTS);
   }
 
-  return data?.length ? data : FALLBACK_COMMENTS;
+  return data?.length
+    ? normalizeComments(data)
+    : normalizeComments(FALLBACK_COMMENTS);
 }
 
 export async function getPortfolioData() {
