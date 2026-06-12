@@ -80,7 +80,7 @@ const STORAGE_REWRITE_MAP = {
 };
 
 const nextConfig = {
-  async rewrites() {
+  async redirects() {
     const supabaseAssetBaseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_ASSET_BASE_URL;
 
@@ -96,6 +96,7 @@ const nextConfig = {
         .split("/")
         .map((segment) => encodeURIComponent(segment))
         .join("/")}`,
+      permanent: false,
     }));
   },
 };
