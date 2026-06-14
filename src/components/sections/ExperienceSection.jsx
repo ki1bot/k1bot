@@ -1,4 +1,4 @@
-import { Cake, GraduationCap } from "lucide-react";
+import { Cake, GraduationCap, bookOpenText } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 
@@ -76,12 +76,12 @@ export function ExperienceSection() {
         </div>
 
         <div className="relative mx-auto mt-14 max-w-5xl md:mt-20">
-          <div className="pointer-events-none absolute bottom-16 left-1/2 top-[10.85rem] -z-10 hidden w-[10px] -translate-x-1/2 md:block">
-            <div className="absolute left-1/2 top-0 h-full w-[10px] -translate-x-1/2 bg-gradient-to-b from-transparent via-violet-400/40 to-violet-500/10 blur-[6px]" />
-            <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-transparent via-violet-300/90 to-violet-500/40" />
+          <div className="pointer-events-none absolute bottom-16 left-1/2 top-[10.85rem] z-0 hidden w-[10px] -translate-x-1/2 md:block">
+            <div className="absolute left-1/2 top-0 h-full w-[10px] -translate-x-1/2 rounded-full bg-violet-400/35 blur-[6px]" />
+            <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full bg-violet-300/80 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
           </div>
 
-          <div className="hidden space-y-12 md:block">
+          <div className="relative z-10 hidden space-y-12 md:block">
             {educationTimeline.map((item, index) => {
               const isLeft = item.side === "left";
               const isRight = item.side === "right";
@@ -192,12 +192,7 @@ export function ExperienceSection() {
 }
 
 function BirthTimelineConnector() {
-  return (
-    <div className="relative -mt-px h-11 w-16">
-      <div className="absolute left-1/2 top-0 h-full w-[10px] -translate-x-1/2 bg-gradient-to-b from-violet-300/35 via-violet-400/40 to-violet-300/25 blur-[6px]" />
-      <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full bg-gradient-to-b from-violet-200/95 via-violet-300/90 to-violet-300/45 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
-    </div>
-  );
+  return <div className="relative h-20 w-16" />;
 }
 
 function TimelineIcon({ Icon, size = "mobile" }) {
@@ -263,36 +258,21 @@ function TimelineCard({
 }
 
 function MobileTimelineItem({ item, icon: Icon, isLastItem }) {
-  const isBirthItem = item.side === "center";
-
   return (
     <div className="relative mx-auto w-full max-w-[330px] text-center">
-      {!isBirthItem ? (
-        <>
-          <div className="relative h-11">
-            <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2">
-              <TimelineIcon Icon={Icon} />
-            </div>
-          </div>
-
-          <div className="relative h-9">
-            <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-violet-300/80 to-violet-300/40 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
-          </div>
-        </>
-      ) : null}
-
       <TimelineCard
         item={item}
         align="center"
         solidBackground
         Icon={Icon}
-        floatingIcon={isBirthItem}
+        floatingIcon
         floatingIconSize="mobile"
       />
 
       {!isLastItem ? (
-        <div className="relative h-9">
-          <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-violet-300/40 via-violet-300/80 to-violet-300/40 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
+        <div className="relative h-14">
+          <div className="absolute left-1/2 top-0 h-full w-[10px] -translate-x-1/2 rounded-full bg-violet-400/35 blur-[6px]" />
+          <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full bg-violet-300/80 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
         </div>
       ) : null}
     </div>
