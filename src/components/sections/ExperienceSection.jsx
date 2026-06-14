@@ -192,7 +192,7 @@ export function ExperienceSection() {
 }
 
 function BirthTimelineConnector() {
-  return <div className="relative h-20 w-16" />;
+  return <div className="relative h-0 w-16" />;
 }
 
 function TimelineIcon({ Icon, size = "mobile" }) {
