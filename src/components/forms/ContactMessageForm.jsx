@@ -11,6 +11,9 @@ const initialForm = {
   message: "",
 };
 
+const fieldClassName =
+  "w-full rounded-xl border border-white/15 bg-white/[0.07] text-sm font-medium text-white caret-white outline-none transition placeholder:text-blue-100/40 focus:border-violet-300/40 focus:bg-white/[0.1] autofill:border-white/15 autofill:shadow-[0_0_0_1000px_rgba(255,255,255,0.07)_inset] autofill:[-webkit-text-fill-color:white] autofill:caret-white autofill:transition-[background-color] autofill:duration-[999999s]";
+
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
@@ -102,7 +105,7 @@ export function ContactMessageForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="relative">
-        <User className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-100/40" />
+        <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
 
         <input
           type="text"
@@ -111,12 +114,12 @@ export function ContactMessageForm() {
           onChange={handleChange}
           placeholder="Nama Anda"
           autoComplete="name"
-          className="h-12 w-full rounded-xl border border-white/15 bg-white/[0.07] pl-11 pr-4 text-sm font-medium text-white outline-none transition placeholder:text-blue-100/40 focus:border-violet-300/40 focus:bg-white/[0.1] sm:h-14"
+          className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
         />
       </div>
 
       <div className="relative">
-        <Mail className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-100/40" />
+        <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
 
         <input
           type="email"
@@ -125,12 +128,12 @@ export function ContactMessageForm() {
           onChange={handleChange}
           placeholder="Email Anda"
           autoComplete="email"
-          className="h-12 w-full rounded-xl border border-white/15 bg-white/[0.07] pl-11 pr-4 text-sm font-medium text-white outline-none transition placeholder:text-blue-100/40 focus:border-violet-300/40 focus:bg-white/[0.1] sm:h-14"
+          className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
         />
       </div>
 
       <div className="relative">
-        <MessageSquareText className="pointer-events-none absolute left-4 top-4 size-4 text-blue-100/40" />
+        <MessageSquareText className="pointer-events-none absolute left-4 top-4 z-10 size-4 text-blue-100/40" />
 
         <textarea
           name="message"
@@ -138,7 +141,7 @@ export function ContactMessageForm() {
           onChange={handleChange}
           placeholder="Pesan Anda"
           rows={5}
-          className="min-h-[120px] w-full resize-none rounded-xl border border-white/15 bg-white/[0.07] py-4 pl-11 pr-4 text-sm font-medium text-white outline-none transition placeholder:text-blue-100/40 focus:border-violet-300/40 focus:bg-white/[0.1]"
+          className={`${fieldClassName} min-h-[120px] resize-none py-4 pl-11 pr-4`}
         />
       </div>
 
