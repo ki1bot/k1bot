@@ -215,7 +215,7 @@ export function HeroSection() {
             </a>
           </div>
 
-          <div className="mt-10 flex items-center gap-4 sm:gap-6 md:mt-16 md:gap-7">
+          <div className="mt-10 flex items-center gap-4 sm:gap-6 md:mt-12 md:gap-7">
             {heroSocials.map((social) => (
               <a
                 key={social.title}
