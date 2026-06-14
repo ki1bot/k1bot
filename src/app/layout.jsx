@@ -5,7 +5,7 @@ import { ReloadToHome } from "@/components/animations/ReloadToHome";
 import { assetUrl } from "@/lib/supabase-storage";
 
 export const metadata = {
-  title: "Rifqi | Software Engineer",
+  title: "Rifqi | Fullstack Web & Software Dev",
   description:
     "Website portofolio pribadi yang menampilkan project, sertifikat, dan kontak.",
   icons: {
