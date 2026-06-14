@@ -1,4 +1,4 @@
-import { Cake, GraduationCap, bookOpenText } from "lucide-react";
+import { Cake, GraduationCap, BookOpenText } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 
@@ -43,7 +43,7 @@ const educationTimeline = [
     title: "Universitas Gunadarma",
     description: "S1 - Sistem Informasi",
     side: "right",
-    icon: GraduationCap,
+    icon: BookOpenText,
   },
 ];
 
