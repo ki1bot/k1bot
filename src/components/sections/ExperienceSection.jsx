@@ -102,12 +102,13 @@ export function ExperienceSection() {
                           item={item}
                           align="center"
                           solidBackground
+                          Icon={Icon}
+                          floatingIcon
+                          floatingIconSize="desktop"
                         />
                       </div>
 
                       <BirthTimelineConnector />
-
-                      <TimelineIcon Icon={Icon} size="desktop" />
                     </div>
                   </RevealOnScroll>
                 );
@@ -194,7 +195,6 @@ function BirthTimelineConnector() {
   return (
     <div className="relative -mt-px h-11 w-16">
       <div className="absolute left-1/2 top-0 h-full w-[10px] -translate-x-1/2 bg-gradient-to-b from-violet-300/35 via-violet-400/40 to-violet-300/25 blur-[6px]" />
-
       <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 rounded-full bg-gradient-to-b from-violet-200/95 via-violet-300/90 to-violet-300/45 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
     </div>
   );
@@ -210,16 +210,24 @@ function TimelineIcon({ Icon, size = "mobile" }) {
       }`}
     >
       <div className="absolute inset-[3px] rounded-full bg-[#211653]" />
-
       <Icon className={`relative z-10 ${isDesktop ? "size-6" : "size-5"}`} />
     </div>
   );
 }
 
-function TimelineCard({ item, align = "left", solidBackground = false }) {
+function TimelineCard({
+  item,
+  align = "left",
+  solidBackground = false,
+  Icon,
+  floatingIcon = false,
+  floatingIconSize = "mobile",
+}) {
   return (
     <div
-      className={`group relative z-30 rounded-[1.5rem] border border-white/10 p-6 shadow-2xl shadow-blue-950/20 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-300/25 hover:shadow-violet-500/15 ${
+      className={`group relative z-30 rounded-[1.5rem] border border-white/10 shadow-2xl shadow-blue-950/20 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-300/25 hover:shadow-violet-500/15 ${
+        floatingIcon ? "px-6 pb-6 pt-12 md:pt-14" : "p-6"
+      } ${
         solidBackground
           ? "bg-[#111735] hover:bg-[#111735]"
           : "bg-white/[0.08] hover:bg-white/[0.1]"
@@ -231,6 +239,12 @@ function TimelineCard({ item, align = "left", solidBackground = false }) {
             : "text-left"
       }`}
     >
+      {floatingIcon && Icon ? (
+        <div className="absolute left-1/2 top-0 z-40 -translate-x-1/2 -translate-y-1/2">
+          <TimelineIcon Icon={Icon} size={floatingIconSize} />
+        </div>
+      ) : null}
+
       <p className="text-sm font-bold uppercase tracking-[0.22em] text-violet-200/75">
         {item.year}
       </p>
@@ -249,33 +263,32 @@ function TimelineCard({ item, align = "left", solidBackground = false }) {
 }
 
 function MobileTimelineItem({ item, icon: Icon, isLastItem }) {
+  const isBirthItem = item.side === "center";
+
   return (
     <div className="relative mx-auto w-full max-w-[330px] text-center">
-      <div className="relative h-11">
-        <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2">
-          <TimelineIcon Icon={Icon} />
-        </div>
-      </div>
+      {!isBirthItem ? (
+        <>
+          <div className="relative h-11">
+            <div className="absolute left-1/2 top-0 z-20 -translate-x-1/2">
+              <TimelineIcon Icon={Icon} />
+            </div>
+          </div>
 
-      <div className="relative h-9">
-        <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-violet-300/80 to-violet-300/40 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
-      </div>
+          <div className="relative h-9">
+            <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-violet-300/80 to-violet-300/40 shadow-[0_0_12px_rgba(196,181,253,0.42)]" />
+          </div>
+        </>
+      ) : null}
 
-      <div className="relative z-20 mx-auto w-full max-w-[310px] rounded-2xl border border-white/10 bg-[#111735] px-4 py-5 shadow-xl shadow-blue-950/20 backdrop-blur-xl">
-        <p className="text-sm font-black tracking-[0.12em] text-violet-100">
-          {item.year}
-        </p>
-
-        <h3 className="mt-2 text-base font-black leading-snug text-white">
-          {item.title}
-        </h3>
-
-        {item.description ? (
-          <p className="mt-2 text-sm font-semibold leading-6 text-blue-100/65">
-            {item.description}
-          </p>
-        ) : null}
-      </div>
+      <TimelineCard
+        item={item}
+        align="center"
+        solidBackground
+        Icon={Icon}
+        floatingIcon={isBirthItem}
+        floatingIconSize="mobile"
+      />
 
       {!isLastItem ? (
         <div className="relative h-9">
