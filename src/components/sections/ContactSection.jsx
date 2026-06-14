@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageCircleMore, Share2 } from "lucide-react";
 
 import { PERSONAL_INFO } from "@/lib/constants";
@@ -63,13 +63,12 @@ export function ContactSection({ comments = [] }) {
   const hubungiCardRef = useRef(null);
   const [commentsCardHeight, setCommentsCardHeight] = useState(null);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const hubungiCard = hubungiCardRef.current;
 
     if (!hubungiCard) return;
 
     let animationFrameId = null;
-    const timeoutIds = [];
 
     function syncCommentsCardHeight() {
       if (animationFrameId) {
@@ -84,7 +83,9 @@ export function ContactSection({ comments = [] }) {
           return;
         }
 
-        const nextHeight = Math.ceil(hubungiCard.offsetHeight);
+        const nextHeight = Math.ceil(
+          hubungiCard.getBoundingClientRect().height,
+        );
 
         setCommentsCardHeight((currentHeight) => {
           if (
@@ -99,65 +100,22 @@ export function ContactSection({ comments = [] }) {
       });
     }
 
-    function scheduleSync() {
-      syncCommentsCardHeight();
-
-      [100, 350, 700].forEach((delay) => {
-        const timeoutId = window.setTimeout(syncCommentsCardHeight, delay);
-        timeoutIds.push(timeoutId);
-      });
-    }
-
-    const resizeObserver = new ResizeObserver(scheduleSync);
+    const resizeObserver = new ResizeObserver(syncCommentsCardHeight);
     resizeObserver.observe(hubungiCard);
 
-    const images = Array.from(hubungiCard.querySelectorAll("img"));
+    syncCommentsCardHeight();
 
-    images.forEach((image) => {
-      if (!image.complete) {
-        image.addEventListener("load", scheduleSync);
-        image.addEventListener("error", scheduleSync);
-      }
-    });
-
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(scheduleSync);
-    }
-
-    scheduleSync();
-
-    window.addEventListener("resize", scheduleSync);
-    window.addEventListener("load", scheduleSync);
+    window.addEventListener("resize", syncCommentsCardHeight);
 
     return () => {
       resizeObserver.disconnect();
-
-      images.forEach((image) => {
-        image.removeEventListener("load", scheduleSync);
-        image.removeEventListener("error", scheduleSync);
-      });
-
-      window.removeEventListener("resize", scheduleSync);
-      window.removeEventListener("load", scheduleSync);
-
-      timeoutIds.forEach((timeoutId) => {
-        window.clearTimeout(timeoutId);
-      });
+      window.removeEventListener("resize", syncCommentsCardHeight);
 
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
     };
   }, []);
-
-  const commentsCardLockedStyle =
-    commentsCardHeight !== null
-      ? {
-          height: `${commentsCardHeight}px`,
-          minHeight: `${commentsCardHeight}px`,
-          maxHeight: `${commentsCardHeight}px`,
-        }
-      : undefined;
 
   return (
     <section id="contact" className="border-t border-white/10 py-20 md:py-32">
@@ -177,7 +135,7 @@ export function ContactSection({ comments = [] }) {
           </p>
         </RevealOnScroll>
 
-        <div className="mt-14 grid items-start gap-10 md:mt-20 md:gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start lg:gap-16 xl:gap-20">
+        <div className="mt-14 grid items-start gap-10 md:mt-20 md:gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 xl:gap-20">
           <RevealOnScroll y={0} className="self-start">
             <div
               ref={hubungiCardRef}
@@ -244,10 +202,16 @@ export function ContactSection({ comments = [] }) {
             </div>
           </RevealOnScroll>
 
-          <RevealOnScroll y={0} className="min-h-0 self-start">
+          <RevealOnScroll y={0} className="self-start">
             <div
-              style={commentsCardLockedStyle}
-              className="flex min-h-0 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-5 md:rounded-[1.75rem] md:p-7"
+              style={
+                commentsCardHeight
+                  ? {
+                      height: `${commentsCardHeight}px`,
+                    }
+                  : undefined
+              }
+              className="flex overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-5 md:rounded-[1.75rem] md:p-7"
             >
               <div className="flex min-h-0 w-full flex-col">
                 <div className="mb-6 flex shrink-0 items-center gap-3">
@@ -269,8 +233,8 @@ export function ContactSection({ comments = [] }) {
                   <CommentForm />
                 </div>
 
-                <div className="mt-7 min-h-0 flex-1 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-3 lg:border-0 lg:bg-transparent lg:p-0">
-                  <div className="comment-scroll-area h-full min-h-0 space-y-4 overflow-y-auto pl-1 pr-5 sm:pr-6 md:pr-6 lg:pr-2">
+                <div className="mt-7 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-3 lg:contents">
+                  <div className="comment-scroll-area max-h-[330px] min-h-0 flex-1 space-y-4 overflow-y-auto pl-1 pr-5 sm:max-h-[380px] sm:pr-6 md:max-h-[430px] md:pr-6 lg:mt-7 lg:max-h-none lg:pl-0 lg:pr-2">
                     {comments.length > 0 ? (
                       comments.map((comment) => (
                         <CommentCard key={comment.id} comment={comment} />
