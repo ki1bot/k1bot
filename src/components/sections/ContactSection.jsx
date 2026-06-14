@@ -269,8 +269,8 @@ export function ContactSection({ comments = [] }) {
                   <CommentForm />
                 </div>
 
-                <div className="mt-7 min-h-0 flex-1 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-3 lg:border-0 lg:bg-transparent lg:p-0">
-                  <div className="comment-scroll-area h-full min-h-0 space-y-4 overflow-y-auto pl-1 pr-5 sm:pr-6 md:pr-6 lg:pr-2">
+                <div className="mt-7 min-h-0 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-3 lg:flex-1 lg:border-0 lg:bg-transparent lg:p-0">
+                  <div className="comment-scroll-area max-h-[360px] min-h-0 space-y-4 overflow-y-auto overscroll-contain pl-1 pr-5 touch-pan-y sm:max-h-[400px] sm:pr-6 md:max-h-[440px] md:pr-6 lg:h-full lg:max-h-none lg:pr-2">
                     {comments.length > 0 ? (
                       comments.map((comment) => (
                         <CommentCard key={comment.id} comment={comment} />
