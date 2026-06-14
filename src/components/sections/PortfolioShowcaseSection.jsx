@@ -314,8 +314,9 @@ function ProjectDetailOverlay({ project, onBack }) {
         </section>
 
         <footer className="relative border-t border-white/10 bg-slate-950/35 px-4 py-7 text-center backdrop-blur-xl sm:px-6 md:px-10 md:py-8">
-          <p className="text-sm font-medium text-blue-100/60">
-            © 2026 Rifqi. All rights reserved.
+          <p>
+            © {new Date().getFullYear()} {PERSONAL_INFO.name}. All rights
+            reserved.
           </p>
         </footer>
       </main>
