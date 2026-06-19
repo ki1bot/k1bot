@@ -15,7 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { TECH_STACK } from "@/lib/constants";
+import { PERSONAL_INFO, TECH_STACK } from "@/lib/constants";
 import { createProjectSlug } from "@/lib/project-slug";
 import { CertificateCard } from "@/components/cards/CertificateCard";
 import { ProjectCard } from "@/components/cards/ProjectCard";
