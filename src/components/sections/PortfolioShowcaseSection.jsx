@@ -10,6 +10,7 @@ import {
   ChevronUp,
   Code2,
   ExternalLink,
+  FileText,
   FolderKanban,
   Layers3,
   Sparkles,
@@ -230,6 +231,18 @@ function ProjectDetailOverlay({ project, onBack }) {
                         className="size-5 rounded-full object-contain"
                       />
                       Github
+                    </a>
+                  )}
+
+                  {project.pdf && (
+                    <a
+                      href={project.pdf}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="video-hover-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-500/10 px-6 text-sm font-bold text-red-100 shadow-xl shadow-blue-950/20 min-[430px]:w-auto sm:h-14 sm:min-w-32 sm:px-7"
+                    >
+                      <FileText className="size-4" />
+                      PDF
                     </a>
                   )}
                 </div>

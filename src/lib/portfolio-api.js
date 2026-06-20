@@ -13,6 +13,7 @@ function normalizeProject(project) {
   return {
     ...project,
     img: resolveAssetUrl(project.img),
+    pdf: project.pdf ? resolveAssetUrl(project.pdf) : "",
   };
 }
 
@@ -56,7 +57,7 @@ export async function getProjects() {
   const { data, error } = await supabase
     .from("projects")
     .select(
-      "id, title, description, img, link, github, features, tech_stack, order_index, created_at",
+      "id, title, description, img, link, github, pdf, features, tech_stack, order_index, created_at",
     )
     .eq("is_published", true)
     .order("order_index", { ascending: true })
@@ -79,7 +80,7 @@ export async function getCertificates() {
 
   const { data, error } = await supabase
     .from("certificates")
-    .select("id, title, img, type, order_index, created_at")
+    .select("id, title, img, pdf_url, type, order_index, created_at")
     .order("order_index", { ascending: true })
     .order("created_at", { ascending: false });
 

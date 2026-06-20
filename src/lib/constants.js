@@ -15,7 +15,7 @@ export const PERSONAL_INFO = {
   youtube: "https://www.youtube.com/@kibot7659",
   tiktok: "https://www.tiktok.com/@kiibott_?_r=1&_t=ZS-96Aalc9CrbQ",
 
-  profileImage: assetUrl("assets/default-avatar.jpg"),
+  profileImage: assetUrl("assets/rifqi.jpg"),
   description:
     "Saya membangun website modern, responsif, dan terstruktur menggunakan React, Next.js, Tailwind CSS, Shadcn, dan Supabase.",
 };
@@ -142,9 +142,10 @@ export const FALLBACK_PROJECTS = [
     id: 5,
     title: "Project Website Delphi 10",
     description: "Coming Soon",
-    img: "/comingsoon.jpg",
+    img: assetUrl("projects/PelayananJasaAc.png"),
     link: "",
     github: "https://github.com/ki1bot/pelayananjasaac.git",
+    pdf: assetUrl("projects/TugasAlgo2APelayananJasaAc.pdf"),
     features: ["", "", "", "", "", "", ""],
     tech_stack: ["", "", "", "", "", ""],
     is_published: true,
@@ -161,6 +162,18 @@ export const FALLBACK_PROJECTS = [
     tech_stack: ["", "", "", "", "", ""],
     is_published: true,
     order_index: 6,
+  },
+  {
+    id: 7,
+    title: "Realtime Collaborative Notes",
+    description: "Coming Soon",
+    img: "/comingsoon.jpg",
+    link: "",
+    github: "https://github.com/ki1bot/realtimecollaborativenotes.git",
+    features: [""],
+    tech_stack: ["", "", "", "", "", ""],
+    is_published: true,
+    order_index: 7,
   },
 ];
 
