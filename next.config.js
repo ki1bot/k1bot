@@ -12,28 +12,32 @@ const nextConfig = {
 
     return [
       {
-        source: "/assets/:path*",
-        destination: `${cleanBaseUrl}/assets/:path*`,
-      },
-      {
-        source: "/media/:path*",
+        source: "/assets/media/:path*",
         destination: `${cleanBaseUrl}/media/:path*`,
       },
       {
-        source: "/projects/:path*",
+        source: "/assets/projects/:path*",
         destination: `${cleanBaseUrl}/projects/:path*`,
       },
       {
-        source: "/screen/:path*",
+        source: "/assets/screen/:path*",
         destination: `${cleanBaseUrl}/screen/:path*`,
+      },
+      {
+        source: "/assets/techstack/:path*",
+        destination: `${cleanBaseUrl}/techstack/:path*`,
+      },
+      {
+        source: "/assets/sertifikat/:path*",
+        destination: `${cleanBaseUrl}/sertifikat/:path*`,
       },
       {
         source: "/sertifikat/:path*",
         destination: `${cleanBaseUrl}/sertifikat/:path*`,
       },
       {
-        source: "/techstack/:path*",
-        destination: `${cleanBaseUrl}/techstack/:path*`,
+        source: "/assets/:path*",
+        destination: `${cleanBaseUrl}/assets/:path*`,
       },
     ];
   },
