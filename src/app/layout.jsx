@@ -4,6 +4,8 @@ import { LoadingScreen } from "@/components/animations/LoadingScreen";
 import { ReloadToHome } from "@/components/animations/ReloadToHome";
 import { assetUrl } from "@/lib/supabase-storage";
 
+const siteIcon = "/assets/logoKibot.png?v=2";
+
 export const metadata = {
   title: "Rifqi | Fullstack Web & Software Dev",
   description:
@@ -11,19 +13,19 @@ export const metadata = {
   icons: {
     icon: [
       {
-        url: assetUrl("assets/logoKibot.png"),
+        url: siteIcon,
         type: "image/png",
       },
     ],
     shortcut: [
       {
-        url: assetUrl("assets/logoKibot.png"),
+        url: siteIcon,
         type: "image/png",
       },
     ],
     apple: [
       {
-        url: assetUrl("assets/logoKibot.png"),
+        url: siteIcon,
         type: "image/png",
       },
     ],
