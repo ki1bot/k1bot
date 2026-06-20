@@ -44,6 +44,9 @@ next-env.d.ts
 /public/sertifikat/*
 !/public/sertifikat/.gitkeep
 
+/public/assets/*
+!/public/assets/.gitkeep
+
 /public/assets/media/*
 !/public/assets/media/.gitkeep
 
