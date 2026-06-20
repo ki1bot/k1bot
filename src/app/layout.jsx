@@ -43,7 +43,7 @@ export default function RootLayout({ children }) {
     >
       <body
         style={{
-          "--portfolio-gradient-blue-image": `url("/${assetUrl(
+          "--portfolio-gradient-blue-image": `url("${assetUrl(
             "assets/gradient-blue.jpg",
           )}")`,
         }}
