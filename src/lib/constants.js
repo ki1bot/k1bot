@@ -167,7 +167,7 @@ export const FALLBACK_PROJECTS = [
     id: 7,
     title: "Realtime Collaborative Notes",
     description: "Coming Soon",
-    img: "/comingsoon.jpg",
+    img: assetUrl("projects/realtimecollaborativenotes.png"),
     link: "",
     github: "https://github.com/ki1bot/realtimecollaborativenotes.git",
     features: [""],
