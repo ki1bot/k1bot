@@ -175,6 +175,18 @@ export const FALLBACK_PROJECTS = [
     is_published: true,
     order_index: 7,
   },
+  {
+    id: 8,
+    title: "???",
+    description: "Coming Soon",
+    img: "/comingsoon.jpg",
+    link: "",
+    github: "",
+    features: [""],
+    tech_stack: ["", "", "", "", "", ""],
+    is_published: true,
+    order_index: 7,
+  },
 ];
 
 export const FALLBACK_CERTIFICATES = [
