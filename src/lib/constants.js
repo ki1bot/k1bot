@@ -185,7 +185,7 @@ export const FALLBACK_PROJECTS = [
     features: [""],
     tech_stack: ["", "", "", "", "", ""],
     is_published: true,
-    order_index: 7,
+    order_index: 8,
   },
 ];
 
