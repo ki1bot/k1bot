@@ -16,6 +16,7 @@ const ASSET_ALIAS_MAP = {
   "projects/MarketPlaceBroker.png": "/assets/projects/MarketPlaceBroker.png",
   "projects/realtimecollaborativenotes.png":
     "/assets/projects/realtimecollaborativenotes.png",
+  "projects/ComingSoon.png": "/assets/projects/ComingSoon.png",
   "projects/PelayananJasaAc.png": "/assets/projects/PelayananJasaAc.png",
   "projects/ProjectQrcode.png": "/assets/projects/ProjectQrcode.png",
   "projects/TugasAlgo2APelayananJasaAc.pdf":

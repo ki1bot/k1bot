@@ -130,7 +130,7 @@ export const FALLBACK_PROJECTS = [
     id: 4,
     title: "Generate Tugas",
     description: "Coming Soon",
-    img: "/comingsoon.jpg",
+    img: assetUrl("projects/ComingSoon.png"),
     link: "https://generate-tugas.vercel.app/",
     github: "https://github.com/ki1bot/generate-tugas.git",
     features: ["", "", "", "", "", "", ""],
