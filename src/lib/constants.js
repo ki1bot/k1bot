@@ -60,7 +60,7 @@ export const FALLBACK_PROJECTS = [
     description:
       "Dashboard sistem marketplace broker yang dibangun menggunakan Laravel 12 sebagai backend, ReactJS sebagai frontend, dan MySQL sebagai database. Sistem ini digunakan untuk mengelola broker, seller, buyer, produk, transaksi, negosiasi, komisi, dan riwayat transaksi dalam satu tampilan modern.",
     img: assetUrl("projects/MarketPlaceBroker.png"),
-    link: "https://sistemmarketplacebroker.vercel.app/",
+    link: "https://sistemmarketplacebroker.page.gd/",
     github: "https://github.com/ki1bot/sistem-marketplace-broker.git",
     features: [
       "Frontend menggunakan ReactJS, Backend menggunakan Laravel 12 dan Database menggunakan MySQL",
