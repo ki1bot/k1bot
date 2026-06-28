@@ -22,7 +22,8 @@ import { CertificateCard } from "@/components/cards/CertificateCard";
 import { ProjectCard } from "@/components/cards/ProjectCard";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 
-const VISIBLE_ITEMS_LIMIT = 6;
+const MOBILE_VISIBLE_ITEMS_LIMIT = 3;
+const DESKTOP_VISIBLE_ITEMS_LIMIT = 6;
 const ACTIVE_PROJECT_STORAGE_KEY = "portfolio_active_project_slug";
 
 const tabs = [
@@ -50,6 +51,27 @@ function normalizeJsonArray(value) {
 
 function getProjectSlug(project) {
   return createProjectSlug(project?.title || "");
+}
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    function handleChange(event) {
+      setIsMobile(event.matches);
+    }
+
+    setIsMobile(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  return isMobile;
 }
 
 function TechStackGrid() {
@@ -339,6 +361,14 @@ function ProjectDetailOverlay({ project, onBack }) {
 
 function ProjectsPanel({ projects, onOpenProject }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const isMobile = useIsMobile();
+  const visibleItemsLimit = isMobile
+    ? MOBILE_VISIBLE_ITEMS_LIMIT
+    : DESKTOP_VISIBLE_ITEMS_LIMIT;
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [isMobile]);
 
   if (!projects?.length) {
     return (
@@ -348,14 +378,11 @@ function ProjectsPanel({ projects, onOpenProject }) {
     );
   }
 
-  const shouldShowButton = projects.length > VISIBLE_ITEMS_LIMIT;
+  const shouldShowButton = projects.length > visibleItemsLimit;
   const visibleProjects = isExpanded
     ? projects
-    : projects.slice(0, VISIBLE_ITEMS_LIMIT);
-  const hiddenProjectsCount = Math.max(
-    projects.length - VISIBLE_ITEMS_LIMIT,
-    0,
-  );
+    : projects.slice(0, visibleItemsLimit);
+  const hiddenProjectsCount = Math.max(projects.length - visibleItemsLimit, 0);
 
   return (
     <div>
@@ -381,6 +408,14 @@ function ProjectsPanel({ projects, onOpenProject }) {
 
 function CertificatesPanel({ certificates }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const isMobile = useIsMobile();
+  const visibleItemsLimit = isMobile
+    ? MOBILE_VISIBLE_ITEMS_LIMIT
+    : DESKTOP_VISIBLE_ITEMS_LIMIT;
+
+  useEffect(() => {
+    setIsExpanded(false);
+  }, [isMobile]);
 
   if (!certificates?.length) {
     return (
@@ -390,12 +425,12 @@ function CertificatesPanel({ certificates }) {
     );
   }
 
-  const shouldShowButton = certificates.length > VISIBLE_ITEMS_LIMIT;
+  const shouldShowButton = certificates.length > visibleItemsLimit;
   const visibleCertificates = isExpanded
     ? certificates
-    : certificates.slice(0, VISIBLE_ITEMS_LIMIT);
+    : certificates.slice(0, visibleItemsLimit);
   const hiddenCertificatesCount = Math.max(
-    certificates.length - VISIBLE_ITEMS_LIMIT,
+    certificates.length - visibleItemsLimit,
     0,
   );
 
