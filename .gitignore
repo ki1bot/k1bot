@@ -46,6 +46,8 @@ next-env.d.ts
 
 /public/assets/*
 !/public/assets/.gitkeep
+!/public/assets/techstack/
+!/public/assets/techstack/**
 
 /public/assets/media/*
 !/public/assets/media/.gitkeep
