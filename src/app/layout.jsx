@@ -7,7 +7,7 @@ import { assetUrl } from "@/lib/supabase-storage";
 const siteIcon = "/assets/logoKibot.png?v=2";
 
 export const metadata = {
-  title: "Rifqi | Fullstack Web & Software Dev",
+  title: "Rifqi | Software Development",
   description:
     "Website portofolio pribadi yang menampilkan project, sertifikat, dan kontak.",
   icons: {

@@ -55,8 +55,11 @@ const ASSET_ALIAS_MAP = {
   "sertifikat/sertifikatlsp-semester2.png":
     "/sertifikat/sertifikatlsp-semester2.png",
 
+  "techstack/angular.png": "/assets/techstack/angular.png",
   "techstack/bootstrap.svg": "/assets/techstack/bootstrap.svg",
   "techstack/c++.png": "/assets/techstack/c++.png",
+  "techstack/c.png": "/assets/techstack/c.png",
+  "techstack/codeigniter.png": "/assets/techstack/codeigniter.png",
   "techstack/css.svg": "/assets/techstack/css.svg",
   "techstack/dart.png": "/assets/techstack/dart.png",
   "techstack/delphi.png": "/assets/techstack/delphi.png",
@@ -76,16 +79,19 @@ const ASSET_ALIAS_MAP = {
   "techstack/nestjs.png": "/assets/techstack/nestjs.png",
   "techstack/nextjs.png": "/assets/techstack/nextjs.png",
   "techstack/nodejs.svg": "/assets/techstack/nodejs.svg",
+  "techstack/nuxtjs.png": "/assets/techstack/nuxtjs.png",
   "techstack/php.png": "/assets/techstack/php.png",
   "techstack/postgresql.png": "/assets/techstack/postgresql.png",
   "techstack/prismaorm.png": "/assets/techstack/prismaorm.png",
   "techstack/python.png": "/assets/techstack/python.png",
   "techstack/reactjs.svg": "/assets/techstack/reactjs.svg",
   "techstack/supabase.png": "/assets/techstack/supabase.png",
+  "techstack/svelte.png": "/assets/techstack/svelte.png",
   "techstack/tailwind.svg": "/assets/techstack/tailwind.svg",
   "techstack/typescript.png": "/assets/techstack/typescript.png",
   "techstack/vercel.svg": "/assets/techstack/vercel.svg",
   "techstack/vite.svg": "/assets/techstack/vite.svg",
+  "techstack/vue.png": "/assets/techstack/vue.png",
 };
 
 function cleanAssetPath(value) {
