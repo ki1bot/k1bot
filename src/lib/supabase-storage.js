@@ -12,6 +12,7 @@ const ASSET_ALIAS_MAP = {
   "media/youtube.png": "/assets/media/youtube.png",
 
   "projects/adminUiYayasan.png": "/assets/projects/adminUiYayasan.png",
+  "projects/flea-defender.png": "/assets/projects/flea-defender.png",
   "projects/coding.gif": "/assets/projects/coding.gif",
   "projects/MarketPlaceBroker.png": "/assets/projects/MarketPlaceBroker.png",
   "projects/realtimecollaborativenotes.png":
