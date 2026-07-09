@@ -21,6 +21,7 @@ import { createProjectSlug } from "@/lib/project-slug";
 import { CertificateCard } from "@/components/cards/CertificateCard";
 import { ProjectCard } from "@/components/cards/ProjectCard";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
+import { Footer } from "@/components/layout/Footer";
 
 const MOBILE_VISIBLE_ITEMS_LIMIT = 3;
 const DESKTOP_VISIBLE_ITEMS_LIMIT = 6;
@@ -348,12 +349,7 @@ function ProjectDetailOverlay({ project, onBack }) {
           </div>
         </section>
 
-        <footer className="relative border-t border-white/10 bg-slate-950/35 px-4 py-7 text-center backdrop-blur-xl sm:px-6 md:px-10 md:py-8">
-          <p>
-            © {new Date().getFullYear()} {PERSONAL_INFO.name}. All rights
-            reserved.
-          </p>
-        </footer>
+        <Footer />
       </main>
     </div>
   );

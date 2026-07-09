@@ -9,10 +9,10 @@ import {
   Layers3,
   Sparkles,
 } from "lucide-react";
-
 import { getProjects } from "@/lib/portfolio-api";
 import { createProjectSlug } from "@/lib/project-slug";
 import { AnimatedBackground } from "@/components/animations/AnimatedBackground";
+import { Footer } from "@/components/layout/Footer";
 
 export const revalidate = 60;
 
@@ -78,7 +78,6 @@ export default async function ProjectDetailPage({ searchParams }) {
 
   const features = normalizeJsonArray(project.features);
   const techStack = normalizeJsonArray(project.tech_stack);
-
   const projectTitle = project.title || "Untitled Project";
   const projectDescription =
     project.description || "Deskripsi project belum tersedia.";
@@ -104,6 +103,7 @@ export default async function ProjectDetailPage({ searchParams }) {
 
             <span>Projects</span>
             <span className="text-blue-100/28">›</span>
+
             <span className="max-w-[180px] truncate text-white min-[420px]:max-w-[260px] sm:max-w-none">
               {projectTitle}
             </span>
@@ -135,6 +135,7 @@ export default async function ProjectDetailPage({ searchParams }) {
                         <p className="text-xl font-black text-white">
                           {techStack.length}
                         </p>
+
                         <p className="text-xs font-medium text-blue-100/55">
                           Total Teknologi
                         </p>
@@ -152,6 +153,7 @@ export default async function ProjectDetailPage({ searchParams }) {
                         <p className="text-xl font-black text-white">
                           {features.length}
                         </p>
+
                         <p className="text-xs font-medium text-blue-100/55">
                           Fitur Utama
                         </p>
@@ -197,6 +199,7 @@ export default async function ProjectDetailPage({ searchParams }) {
                 <div className="detail-reveal detail-delay-5 mt-8 sm:mt-9">
                   <div className="mb-4 flex items-center gap-3 sm:mb-5">
                     <Code2 className="size-4 text-blue-300" />
+
                     <h2 className="text-lg font-black text-white sm:text-xl">
                       Technologies Used
                     </h2>
@@ -205,7 +208,7 @@ export default async function ProjectDetailPage({ searchParams }) {
                   <div className="flex max-w-[620px] flex-wrap gap-2.5 sm:gap-3">
                     {techStack.map((tech, index) => (
                       <span
-                        key={tech}
+                        key={`${tech}-${index}`}
                         style={{
                           animationDelay: `${420 + index * 45}ms`,
                         }}
@@ -238,6 +241,7 @@ export default async function ProjectDetailPage({ searchParams }) {
               <div className="detail-reveal detail-delay-4 detail-feature-card rounded-2xl border border-white/10 bg-white/[0.035] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-6">
                 <div className="mb-5 flex items-center gap-3 sm:mb-6">
                   <Sparkles className="size-5 text-yellow-300" />
+
                   <h2 className="text-xl font-black text-white sm:text-2xl">
                     Key Features
                   </h2>
@@ -247,16 +251,14 @@ export default async function ProjectDetailPage({ searchParams }) {
                   <ul className="detail-feature-list space-y-2.5 sm:space-y-3">
                     {features.map((feature, index) => (
                       <li
-                        key={feature}
+                        key={`${feature}-${index}`}
                         style={{
                           animationDelay: `${480 + index * 50}ms`,
                         }}
                         className="detail-feature-item group"
                       >
                         <span className="detail-feature-shine" />
-
                         <span className="detail-feature-dot" />
-
                         <span className="detail-feature-text">{feature}</span>
                       </li>
                     ))}
@@ -272,12 +274,7 @@ export default async function ProjectDetailPage({ searchParams }) {
         </div>
       </section>
 
-      <footer className="relative border-t border-white/10 bg-slate-950/35 px-4 py-7 text-center backdrop-blur-xl sm:px-6 md:px-10 md:py-8">
-        <p>
-          © {new Date().getFullYear()} {PERSONAL_INFO.name}. All rights
-          reserved.
-        </p>
-      </footer>
+      <Footer />
     </main>
   );
 }
