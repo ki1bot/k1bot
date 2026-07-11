@@ -87,12 +87,12 @@ export const FALLBACK_PROJECTS = [
   },
   {
     id: 2,
-    title: "Yayasan Azzahra-Perwira",
+    title: "Azzahra Perwira",
     description:
       "Website yayasan dengan halaman publik dan dashboard admin untuk mengelola konten lembaga. Project ini dibuat menggunakan CodeIgniter 4, PHP, MySQL, CSS, dan JavaScript, dengan fitur pengelolaan halaman seperti beranda, profil, tenaga pengajar, unit KB/TK, TPQ, daycare, lansia, dan informasi.",
     img: assetUrl("projects/adminUiYayasan.png"),
-    link: "https://localhost/azzahra-perwira",
-    github: "https://github.com/ki1bot/project-yayasanV5.git",
+    link: "https://azzahra-perwira.xo.je/",
+    github: "https://github.com/ki1bot/azzahraperwira.git",
     features: [
       "Dashboard admin untuk mengelola konten website yayasan",
       "Manajemen halaman Beranda, Profile, Tenaga Pengajar, Unit KB/TK, Unit TPQ, Unit Daycare, Unit Lansia, dan Informasi",
