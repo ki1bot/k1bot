@@ -324,6 +324,14 @@ export const FALLBACK_CERTIFICATES = [
   },
   {
     id: 10,
+    title: "RevoU Certificate Software Engineering",
+    img: assetUrl("sertifikat/RevoU-SoftwareEngineering.png"),
+    pdf_url: assetUrl("sertifikat/RevoU-SoftwareEngineering.pdf"),
+    type: "pdf",
+    order_index: 9,
+  },
+  {
+    id: 11,
     title: "Sertifikat LSP Semester 1",
     img: assetUrl("sertifikat/sertifikatlsp-semester1.png"),
     pdf_url: assetUrl("sertifikat/sertifikatlsp-semester1.pdf"),
@@ -331,7 +339,7 @@ export const FALLBACK_CERTIFICATES = [
     order_index: 10,
   },
   {
-    id: 11,
+    id: 12,
     title: "Sertifikat LSP Semester 2",
     img: assetUrl("sertifikat/sertifikatlsp-semester2.png"),
     pdf_url: assetUrl("sertifikat/sertifikatlsp-semester2.pdf"),
@@ -339,7 +347,7 @@ export const FALLBACK_CERTIFICATES = [
     order_index: 11,
   },
   {
-    id: 12,
+    id: 13,
     title: "Sertifikat Kompetensi",
     img: assetUrl("sertifikat/SertifikatKompetensi.png"),
     pdf_url: assetUrl("sertifikat/SertifikatKompetensi.pdf"),
