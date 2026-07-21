@@ -10,7 +10,7 @@ export function RevealOnScroll({
   delay = 0,
   y = 32,
   scale = 0.985,
-  once = false,
+  once = true,
   as: Component = "div",
 }) {
   const elementRef = useRef(null);
@@ -19,7 +19,18 @@ export function RevealOnScroll({
   useEffect(() => {
     const element = elementRef.current;
 
-    if (!element) return;
+    if (!element) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -29,13 +40,17 @@ export function RevealOnScroll({
           if (once) {
             observer.unobserve(element);
           }
-        } else {
+
+          return;
+        }
+
+        if (!once) {
           setIsVisible(false);
         }
       },
       {
-        threshold: 0.16,
-        rootMargin: "0px 0px -80px 0px",
+        threshold: 0.08,
+        rootMargin: "0px 0px -40px 0px",
       },
     );
 
@@ -53,6 +68,7 @@ export function RevealOnScroll({
         "--reveal-y": `${y}px`,
         "--reveal-scale": scale,
         "--reveal-delay": `${delay}ms`,
+        willChange: isVisible ? "auto" : "opacity, filter, transform",
       }}
       className={cn(
         "reveal-on-scroll",

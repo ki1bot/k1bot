@@ -1,16 +1,42 @@
+"use client";
+
+import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
+import { createProjectSlug } from "@/lib/project-slug";
 
-export function ProjectCard({ project, onOpenDetail }) {
+const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
+
+export function ProjectCard({ project }) {
   const projectTitle = project.title || "Untitled Project";
   const projectDescription =
     project.description || "Deskripsi project belum tersedia.";
 
-  function handleOpenDetail() {
-    if (typeof onOpenDetail === "function") {
-      onOpenDetail(project);
+  const projectSlug = createProjectSlug(projectTitle);
+  const projectDetailUrl = `/project?slug=${encodeURIComponent(projectSlug)}`;
+
+  function handleDetailNavigation(event) {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
     }
+
+    try {
+      sessionStorage.setItem(
+        PROJECT_RETURN_STORAGE_KEY,
+        JSON.stringify({
+          url: window.location.href,
+          savedAt: Date.now(),
+        }),
+      );
+    } catch {}
   }
 
   return (
@@ -64,14 +90,16 @@ export function ProjectCard({ project, onOpenDetail }) {
             </span>
           )}
 
-          <button
-            type="button"
-            onClick={handleOpenDetail}
+          <Link
+            href={projectDetailUrl}
+            prefetch={false}
+            onClick={handleDetailNavigation}
+            aria-label={`Buka detail project ${projectTitle}`}
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-5 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition duration-300 hover:-translate-y-0.5 hover:border-violet-300/25 hover:bg-white/[0.12] min-[430px]:h-12 min-[430px]:w-auto"
           >
             Details
             <ArrowRight className="size-4 transition duration-300 group-hover:translate-x-0.5" />
-          </button>
+          </Link>
         </div>
       </div>
     </Card>

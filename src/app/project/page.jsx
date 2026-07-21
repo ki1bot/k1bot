@@ -1,24 +1,33 @@
-import { assetUrl } from "@/lib/supabase-storage";
-import Link from "next/link";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
   Boxes,
   Code2,
   ExternalLink,
+  FileText,
   Layers3,
   Sparkles,
 } from "lucide-react";
+
+import { assetUrl } from "@/lib/supabase-storage";
 import { getProjects } from "@/lib/portfolio-api";
 import { createProjectSlug } from "@/lib/project-slug";
 import { AnimatedBackground } from "@/components/animations/AnimatedBackground";
+import { ProjectBackButton } from "@/components/layout/ProjectBackButton";
 import { Footer } from "@/components/layout/Footer";
 
 export const revalidate = 60;
 
+const getCachedProjects = cache(getProjects);
+
 function normalizeJsonArray(value) {
-  if (Array.isArray(value)) return value;
-  return [];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item) => {
+    return typeof item === "string" && item.trim().length > 0;
+  });
 }
 
 function getSlugValue(searchParams) {
@@ -32,9 +41,11 @@ function getSlugValue(searchParams) {
 }
 
 async function getProjectBySlug(slug) {
-  const projects = await getProjects();
+  const projects = await getCachedProjects();
 
-  return projects.find((project) => createProjectSlug(project.title) === slug);
+  return projects.find((project) => {
+    return createProjectSlug(project.title) === slug;
+  });
 }
 
 export async function generateMetadata({ searchParams }) {
@@ -93,13 +104,7 @@ export default async function ProjectDetailPage({ searchParams }) {
 
         <div className="mx-auto max-w-[1180px]">
           <div className="detail-reveal flex flex-wrap items-center gap-2 text-xs font-semibold text-blue-100/50 sm:gap-4 sm:text-sm">
-            <Link
-              href="/#projects"
-              className="video-hover-button video-hover-button-dark inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 px-4 text-white shadow-lg shadow-blue-950/10 sm:h-12 sm:px-5"
-            >
-              <ArrowLeft className="size-4" />
-              Back
-            </Link>
+            <ProjectBackButton />
 
             <span>Projects</span>
             <span className="text-blue-100/28">›</span>
@@ -193,6 +198,18 @@ export default async function ProjectDetailPage({ searchParams }) {
                     Github
                   </a>
                 )}
+
+                {project.pdf && (
+                  <a
+                    href={project.pdf}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="video-hover-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-red-400/25 bg-red-500/10 px-6 text-sm font-bold text-red-100 shadow-xl shadow-blue-950/20 min-[430px]:w-auto sm:h-14 sm:min-w-32 sm:px-7"
+                  >
+                    <FileText className="size-4" />
+                    PDF
+                  </a>
+                )}
               </div>
 
               {techStack.length > 0 && (
@@ -229,6 +246,9 @@ export default async function ProjectDetailPage({ searchParams }) {
                   <img
                     src={project.img}
                     alt={projectTitle}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                     className="aspect-[16/10] w-full rounded-xl object-cover object-top sm:aspect-video"
                   />
                 ) : (
