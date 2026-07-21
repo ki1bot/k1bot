@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, ExternalLink } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -9,12 +10,24 @@ import { createProjectSlug } from "@/lib/project-slug";
 const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
 
 export function ProjectCard({ project }) {
+  const router = useRouter();
+
   const projectTitle = project.title || "Untitled Project";
   const projectDescription =
     project.description || "Deskripsi project belum tersedia.";
 
+  const projectId = String(project.id ?? "").trim();
   const projectSlug = createProjectSlug(projectTitle);
-  const projectDetailUrl = `/project?slug=${encodeURIComponent(projectSlug)}`;
+
+  const projectDetailUrl = projectId
+    ? `/project?id=${encodeURIComponent(projectId)}&slug=${encodeURIComponent(
+        projectSlug,
+      )}`
+    : `/project?slug=${encodeURIComponent(projectSlug)}`;
+
+  function prefetchProjectDetail() {
+    router.prefetch(projectDetailUrl);
+  }
 
   function handleDetailNavigation(event) {
     if (
@@ -92,7 +105,10 @@ export function ProjectCard({ project }) {
 
           <Link
             href={projectDetailUrl}
-            prefetch={false}
+            prefetch={true}
+            onMouseEnter={prefetchProjectDetail}
+            onFocus={prefetchProjectDetail}
+            onTouchStart={prefetchProjectDetail}
             onClick={handleDetailNavigation}
             aria-label={`Buka detail project ${projectTitle}`}
             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.07] px-5 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition duration-300 hover:-translate-y-0.5 hover:border-violet-300/25 hover:bg-white/[0.12] min-[430px]:h-12 min-[430px]:w-auto"

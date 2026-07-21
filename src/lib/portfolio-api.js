@@ -8,6 +8,10 @@ import {
   createPdfUrlFromImageUrl,
   resolveAssetUrl,
 } from "@/lib/supabase-storage";
+import { createProjectSlug } from "@/lib/project-slug";
+
+const PROJECT_COLUMNS =
+  "id, title, description, img, link, github, pdf, features, tech_stack, order_index, created_at";
 
 function normalizeProject(project) {
   return {
@@ -49,6 +53,22 @@ function normalizeComments(comments) {
   return comments.map(normalizeComment);
 }
 
+function findFallbackProjectById(projectId) {
+  return (
+    FALLBACK_PROJECTS.find((project) => {
+      return String(project.id) === String(projectId);
+    }) || null
+  );
+}
+
+function findFallbackProjectBySlug(slug) {
+  return (
+    FALLBACK_PROJECTS.find((project) => {
+      return createProjectSlug(project.title) === slug;
+    }) || null
+  );
+}
+
 export async function getProjects() {
   if (!isSupabaseConfigured || !supabase) {
     return normalizeProjects(FALLBACK_PROJECTS);
@@ -56,9 +76,7 @@ export async function getProjects() {
 
   const { data, error } = await supabase
     .from("projects")
-    .select(
-      "id, title, description, img, link, github, pdf, features, tech_stack, order_index, created_at",
-    )
+    .select(PROJECT_COLUMNS)
     .eq("is_published", true)
     .order("order_index", { ascending: true })
     .order("created_at", { ascending: false });
@@ -71,6 +89,73 @@ export async function getProjects() {
   return data?.length
     ? normalizeProjects(data)
     : normalizeProjects(FALLBACK_PROJECTS);
+}
+
+export async function getProjectById(projectId) {
+  const normalizedProjectId = String(projectId ?? "").trim();
+
+  if (!/^\d+$/.test(normalizedProjectId)) {
+    return null;
+  }
+
+  const fallbackProject = findFallbackProjectById(normalizedProjectId);
+
+  if (!isSupabaseConfigured || !supabase) {
+    return fallbackProject ? normalizeProject(fallbackProject) : null;
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PROJECT_COLUMNS)
+    .eq("id", normalizedProjectId)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to fetch project detail:", error.message);
+    return fallbackProject ? normalizeProject(fallbackProject) : null;
+  }
+
+  if (!data) {
+    return fallbackProject ? normalizeProject(fallbackProject) : null;
+  }
+
+  return normalizeProject(data);
+}
+
+export async function getProjectBySlug(slug) {
+  const normalizedSlug = String(slug ?? "").trim();
+
+  if (!normalizedSlug) {
+    return null;
+  }
+
+  const fallbackProject = findFallbackProjectBySlug(normalizedSlug);
+
+  if (!isSupabaseConfigured || !supabase) {
+    return fallbackProject ? normalizeProject(fallbackProject) : null;
+  }
+
+  const { data, error } = await supabase
+    .from("projects")
+    .select(PROJECT_COLUMNS)
+    .eq("is_published", true)
+    .order("order_index", { ascending: true });
+
+  if (error) {
+    console.error("Failed to fetch project by slug:", error.message);
+    return fallbackProject ? normalizeProject(fallbackProject) : null;
+  }
+
+  const project = data?.find((currentProject) => {
+    return createProjectSlug(currentProject.title) === normalizedSlug;
+  });
+
+  if (!project) {
+    return fallbackProject ? normalizeProject(fallbackProject) : null;
+  }
+
+  return normalizeProject(project);
 }
 
 export async function getCertificates() {

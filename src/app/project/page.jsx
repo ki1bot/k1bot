@@ -10,15 +10,15 @@ import {
 } from "lucide-react";
 
 import { assetUrl } from "@/lib/supabase-storage";
-import { getProjects } from "@/lib/portfolio-api";
-import { createProjectSlug } from "@/lib/project-slug";
+import { getProjectById, getProjectBySlug } from "@/lib/portfolio-api";
 import { AnimatedBackground } from "@/components/animations/AnimatedBackground";
 import { ProjectBackButton } from "@/components/layout/ProjectBackButton";
 import { Footer } from "@/components/layout/Footer";
 
 export const revalidate = 60;
 
-const getCachedProjects = cache(getProjects);
+const getCachedProjectById = cache(getProjectById);
+const getCachedProjectBySlug = cache(getProjectBySlug);
 
 function normalizeJsonArray(value) {
   if (!Array.isArray(value)) {
@@ -30,39 +30,43 @@ function normalizeJsonArray(value) {
   });
 }
 
-function getSlugValue(searchParams) {
-  const slug = searchParams?.slug;
+function getSearchParamValue(searchParams, key) {
+  const value = searchParams?.[key];
 
-  if (Array.isArray(slug)) {
-    return slug[0];
+  if (Array.isArray(value)) {
+    return value[0];
   }
 
-  return slug;
+  return value;
 }
 
-async function getProjectBySlug(slug) {
-  const projects = await getCachedProjects();
+async function resolveProject(searchParams) {
+  const projectId = getSearchParamValue(searchParams, "id");
+  const projectSlug = getSearchParamValue(searchParams, "slug");
 
-  return projects.find((project) => {
-    return createProjectSlug(project.title) === slug;
-  });
+  if (projectId) {
+    const project = await getCachedProjectById(projectId);
+
+    if (project) {
+      return project;
+    }
+  }
+
+  if (projectSlug) {
+    return getCachedProjectBySlug(projectSlug);
+  }
+
+  return null;
 }
 
 export async function generateMetadata({ searchParams }) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
-  const slug = getSlugValue(resolvedSearchParams);
-
-  if (!slug) {
-    return {
-      title: "Project Tidak Ditemukan | Rifqi Susanto",
-    };
-  }
-
-  const project = await getProjectBySlug(slug);
+  const project = await resolveProject(resolvedSearchParams);
 
   if (!project) {
     return {
       title: "Project Tidak Ditemukan | Rifqi Susanto",
+      description: "Project portofolio tidak ditemukan.",
     };
   }
 
@@ -75,13 +79,7 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function ProjectDetailPage({ searchParams }) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
-  const slug = getSlugValue(resolvedSearchParams);
-
-  if (!slug) {
-    notFound();
-  }
-
-  const project = await getProjectBySlug(slug);
+  const project = await resolveProject(resolvedSearchParams);
 
   if (!project) {
     notFound();
@@ -195,7 +193,7 @@ export default async function ProjectDetailPage({ searchParams }) {
                       decoding="async"
                       className="size-5 rounded-full object-contain"
                     />
-                    Github
+                    GitHub
                   </a>
                 )}
 
