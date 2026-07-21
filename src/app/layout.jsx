@@ -44,6 +44,7 @@ export default function RootLayout({ children }) {
       className="portfolio-is-loading"
     >
       <body
+        suppressHydrationWarning
         style={{
           "--portfolio-gradient-blue-image": `url("${assetUrl(
             "assets/gradient-blue.jpg",

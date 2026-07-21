@@ -169,7 +169,7 @@ export const FALLBACK_PROJECTS = [
   {
     id: 6,
     title: "Generate Website To PDF",
-    description: "Coming Soon",
+    description: "",
     img: assetUrl("projects/GeneratePDF.png"),
     link: "",
     github: "https://github.com/ki1bot/pdf-generate.git",
@@ -238,7 +238,7 @@ export const FALLBACK_PROJECTS = [
   {
     id: 9,
     title: "Kalkulator Ilmiah",
-    description: "Coming Soon",
+    description: "",
     img: assetUrl("projects/KalkulatorIlmiah.png"),
     link: "",
     github: "https://github.com/ki1bot/kalkulator-ilmiah.git",
