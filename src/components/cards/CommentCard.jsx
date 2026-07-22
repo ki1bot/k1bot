@@ -34,6 +34,12 @@ export function CommentCard({ comment }) {
             <img
               src={comment.profile_image}
               alt={comment.user_name || "Komentar pengguna"}
+              width={44}
+              height={44}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              draggable={false}
               className="h-full w-full object-cover"
             />
           ) : (

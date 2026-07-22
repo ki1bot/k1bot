@@ -54,6 +54,12 @@ function SocialIcon({ item, className = "h-full w-full" }) {
     <img
       src={item.image}
       alt={item.title}
+      width={44}
+      height={44}
+      loading="lazy"
+      decoding="async"
+      fetchPriority="low"
+      draggable={false}
       className={`${className} object-contain`}
     />
   );
@@ -125,7 +131,6 @@ export function ContactSection({ comments = [] }) {
     }
 
     scheduleSync();
-
     window.addEventListener("resize", scheduleSync);
     window.addEventListener("load", scheduleSync);
 

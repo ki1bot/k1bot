@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Mail, Sparkles } from "lucide-react";
 
@@ -293,14 +294,15 @@ export function HeroSection() {
                 aria-label={social.title}
                 className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] p-3 shadow-lg shadow-violet-950/20 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-300/25 hover:bg-violet-500/10 sm:size-12"
               >
-                <img
+                <Image
                   src={social.image}
                   alt={social.title}
                   width={32}
                   height={32}
+                  sizes="32px"
                   loading="eager"
-                  decoding="async"
                   className="h-full w-full object-contain"
+                  draggable={false}
                 />
               </a>
             ))}
