@@ -241,7 +241,7 @@ export function HeroSection() {
           <h1 className="mt-7 max-w-2xl text-[2.75rem] font-black leading-[1.03] tracking-tight text-white min-[390px]:text-5xl sm:text-6xl md:mt-10 md:text-7xl">
             Software{" "}
             <span className="block bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-              Development
+              Engineer
             </span>
           </h1>
 
