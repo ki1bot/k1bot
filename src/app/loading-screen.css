@@ -1,0 +1,106 @@
+:root {
+  --portfolio-gradient-blue-image: url("/assets/gradient-blue.jpg");
+}
+
+.portfolio-loader.portfolio-loader-auto-exit {
+  animation-name: portfolioLoaderAutoExit;
+  animation-duration: 700ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+  animation-delay: 2300ms;
+  animation-fill-mode: forwards;
+  will-change: opacity, transform, filter;
+}
+
+.portfolio-loader-icon:nth-child(1) {
+  --loader-icon-delay: 0ms;
+}
+
+.portfolio-loader-icon:nth-child(2) {
+  --loader-icon-delay: 140ms;
+}
+
+.portfolio-loader-icon:nth-child(3) {
+  --loader-icon-delay: 280ms;
+}
+
+@keyframes portfolioLoaderAutoExit {
+  0% {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: scale(1);
+    filter: blur(0);
+  }
+
+  99% {
+    visibility: visible;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(1.04);
+    filter: blur(14px);
+  }
+}
+
+@media (max-width: 767px) {
+  .portfolio-loader.portfolio-loader-auto-exit {
+    animation-duration: 280ms;
+    animation-delay: 500ms;
+  }
+
+  .portfolio-loader-content {
+    animation-duration: 180ms;
+  }
+
+  .portfolio-loader-icon:nth-child(1) {
+    --loader-mobile-icon-delay: 0ms;
+  }
+
+  .portfolio-loader-icon:nth-child(2) {
+    --loader-mobile-icon-delay: 50ms;
+  }
+
+  .portfolio-loader-icon:nth-child(3) {
+    --loader-mobile-icon-delay: 100ms;
+  }
+
+  .portfolio-loader-icon {
+    animation:
+      portfolioIconReveal 180ms cubic-bezier(0.22, 1, 0.36, 1) forwards,
+      portfolioIconFloat 2.4s ease-in-out infinite;
+    animation-delay:
+      var(--loader-mobile-icon-delay),
+      calc(var(--loader-mobile-icon-delay) + 220ms);
+  }
+
+  .portfolio-loader-title span {
+    animation-duration: 220ms;
+    animation-delay: 100ms;
+  }
+
+  .portfolio-loader-title strong {
+    animation:
+      portfolioTextReveal 220ms cubic-bezier(0.22, 1, 0.36, 1) 160ms forwards,
+      portfolioGradientMove 2.4s ease-in-out 380ms infinite alternate;
+  }
+
+  .portfolio-loader-progress span {
+    animation-duration: 650ms;
+  }
+
+  .portfolio-loader-orb {
+    animation-duration: 2.2s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-loader.portfolio-loader-auto-exit {
+    animation-duration: 1ms;
+    animation-delay: 300ms;
+    transform: none;
+    filter: none;
+  }
+}

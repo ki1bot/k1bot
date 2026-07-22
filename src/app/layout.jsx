@@ -1,8 +1,8 @@
 import "./globals.css";
+import "./loading-screen.css";
 
 import { LoadingScreen } from "@/components/animations/LoadingScreen";
 import { ReloadToHome } from "@/components/animations/ReloadToHome";
-import { assetUrl } from "@/lib/supabase-storage";
 
 const siteIcon = "/assets/logoKibot.png?v=2";
 
@@ -39,14 +39,7 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="id" data-scroll-behavior="smooth">
-      <body
-        className="portfolio-loading-active"
-        style={{
-          "--portfolio-gradient-blue-image": `url("${assetUrl(
-            "assets/gradient-blue.jpg",
-          )}")`,
-        }}
-      >
+      <body>
         <ReloadToHome />
         <LoadingScreen />
         {children}
