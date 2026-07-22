@@ -22,34 +22,48 @@ const loadingIcons = [
   },
 ];
 
+const MOBILE_EXIT_DELAY = 1400;
+const MOBILE_REMOVE_DELAY = 2100;
+const DESKTOP_EXIT_DELAY = 2300;
+const DESKTOP_REMOVE_DELAY = 3000;
+
 export function LoadingScreen() {
   const [isVisible, setIsVisible] = useState(true);
   const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
     const htmlElement = document.documentElement;
+    const isMobileViewport = window.matchMedia("(max-width: 767px)").matches;
+
+    const exitDelay = isMobileViewport ? MOBILE_EXIT_DELAY : DESKTOP_EXIT_DELAY;
+
+    const removeDelay = isMobileViewport
+      ? MOBILE_REMOVE_DELAY
+      : DESKTOP_REMOVE_DELAY;
 
     document.body.classList.add("portfolio-loading-active");
 
-    const exitTimer = setTimeout(() => {
+    const exitTimer = window.setTimeout(() => {
       setIsLeaving(true);
       htmlElement.classList.remove("portfolio-is-loading");
-    }, 2300);
+    }, exitDelay);
 
-    const removeTimer = setTimeout(() => {
+    const removeTimer = window.setTimeout(() => {
       setIsVisible(false);
       document.body.classList.remove("portfolio-loading-active");
-    }, 3000);
+    }, removeDelay);
 
     return () => {
-      clearTimeout(exitTimer);
-      clearTimeout(removeTimer);
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(removeTimer);
       htmlElement.classList.remove("portfolio-is-loading");
       document.body.classList.remove("portfolio-loading-active");
     };
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <div
@@ -64,7 +78,7 @@ export function LoadingScreen() {
 
       <div className="portfolio-loader-content">
         <div className="portfolio-loader-icons" aria-hidden="true">
-          {loadingIcons.map((icon) => (
+          {loadingIcons.map((icon, index) => (
             <div
               key={icon.label}
               className="portfolio-loader-icon"
@@ -75,6 +89,11 @@ export function LoadingScreen() {
               <img
                 src={icon.src}
                 alt=""
+                width={40}
+                height={40}
+                loading="eager"
+                decoding="async"
+                fetchPriority={index === 0 ? "high" : "auto"}
                 className="portfolio-loader-image-icon"
                 draggable="false"
               />

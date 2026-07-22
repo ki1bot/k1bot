@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Mail, Sparkles } from "lucide-react";
 
 import { PERSONAL_INFO } from "@/lib/constants";
@@ -36,12 +36,19 @@ const heroSocials = [
   },
 ];
 
+const HERO_GIF_SOURCE = assetUrl("projects/coding.gif");
+
+const TRANSPARENT_GIF =
+  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
 function resetGifMotion(element) {
-  if (!(element instanceof HTMLElement)) return;
+  if (!(element instanceof HTMLElement)) {
+    return;
+  }
 
   element.classList.remove("is-gif-active");
   element.style.setProperty("--gif-x", "0px");
@@ -66,7 +73,9 @@ function useTypewriter(
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -96,6 +105,7 @@ function useTypewriter(
         }
 
         const nextText = currentWord.slice(0, displayText.length - 1);
+
         setDisplayText(nextText);
 
         if (nextText === "") {
@@ -124,15 +134,65 @@ function useTypewriter(
 
 export function HeroSection() {
   const typedRole = useTypewriter(heroRoles);
+  const gifFieldRef = useRef(null);
+  const [shouldLoadGif, setShouldLoadGif] = useState(false);
+
+  useEffect(() => {
+    const gifField = gifFieldRef.current;
+
+    if (!gifField) {
+      return;
+    }
+
+    const desktopMediaQuery = window.matchMedia("(min-width: 1024px)");
+
+    if (desktopMediaQuery.matches) {
+      setShouldLoadGif(true);
+      return;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoadGif(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const isVisible = entries.some((entry) => entry.isIntersecting);
+
+        if (!isVisible) {
+          return;
+        }
+
+        setShouldLoadGif(true);
+        observer.disconnect();
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.01,
+      },
+    );
+
+    observer.observe(gifField);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   function handleGifPointerMove(event) {
     const element = event.currentTarget;
 
-    if (!(element instanceof HTMLElement)) return;
+    if (!(element instanceof HTMLElement)) {
+      return;
+    }
 
     const rect = element.getBoundingClientRect();
 
-    if (rect.width === 0 || rect.height === 0) return;
+    if (rect.width === 0 || rect.height === 0) {
+      return;
+    }
 
     const pointerX = clamp(event.clientX - rect.left, 0, rect.width);
     const pointerY = clamp(event.clientY - rect.top, 0, rect.height);
@@ -236,8 +296,8 @@ export function HeroSection() {
                 <img
                   src={social.image}
                   alt={social.title}
-                  width="32"
-                  height="32"
+                  width={32}
+                  height={32}
                   loading="eager"
                   decoding="async"
                   className="h-full w-full object-contain"
@@ -249,14 +309,20 @@ export function HeroSection() {
 
         <div className="order-2 block lg:translate-x-16 xl:translate-x-20">
           <div
+            ref={gifFieldRef}
             onPointerMove={handleGifPointerMove}
             onPointerLeave={handleGifPointerLeave}
             onPointerCancel={handleGifPointerLeave}
             className="hero-gif-field relative mx-auto flex w-full max-w-[320px] cursor-pointer items-center justify-center bg-transparent sm:max-w-[420px] md:max-w-[520px] lg:max-w-[720px]"
           >
             <img
-              src={assetUrl("projects/coding.gif")}
+              src={shouldLoadGif ? HERO_GIF_SOURCE : TRANSPARENT_GIF}
               alt="Frontend development illustration"
+              width={690}
+              height={690}
+              loading={shouldLoadGif ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={shouldLoadGif ? "high" : "low"}
               className="hero-gif-image relative z-10 w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"
             />
           </div>

@@ -38,12 +38,9 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="id"
-      data-scroll-behavior="smooth"
-      className="portfolio-is-loading"
-    >
+    <html lang="id" data-scroll-behavior="smooth">
       <body
+        className="portfolio-loading-active"
         style={{
           "--portfolio-gradient-blue-image": `url("${assetUrl(
             "assets/gradient-blue.jpg",
