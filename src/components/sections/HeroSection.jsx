@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Mail, Sparkles } from "lucide-react";
 
+import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { PERSONAL_INFO } from "@/lib/constants";
 import { assetUrl } from "@/lib/supabase-storage";
 
@@ -232,7 +233,7 @@ export function HeroSection() {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_38%,rgba(124,58,237,0.18),transparent_28%),radial-gradient(circle_at_82%_38%,rgba(14,165,233,0.1),transparent_30%)] md:bg-[radial-gradient(circle_at_18%_38%,rgba(124,58,237,0.22),transparent_28%),radial-gradient(circle_at_82%_38%,rgba(14,165,233,0.14),transparent_30%)]" />
 
       <div className="mx-auto grid min-h-screen max-w-[1320px] items-center gap-10 px-4 pb-20 pt-28 sm:px-6 sm:pt-32 md:px-10 md:pb-28 md:pt-44 lg:grid-cols-[0.9fr_1.1fr] lg:gap-28 lg:pt-56 xl:gap-48">
-        <div className="order-1 opacity-100">
+        <RevealOnScroll className="order-1 opacity-100" y={28} scale={0.99}>
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-xs font-medium text-violet-200 shadow-lg shadow-violet-500/10 backdrop-blur-xl sm:px-4 sm:text-sm">
             <Sparkles className="size-4 text-blue-300" />
             Ready to Innovate
@@ -240,7 +241,7 @@ export function HeroSection() {
 
           <h1 className="mt-7 max-w-2xl text-[2.75rem] font-black leading-[1.03] tracking-tight text-white min-[390px]:text-5xl sm:text-6xl md:mt-10 md:text-7xl">
             Software{" "}
-            <span className="block bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+            <span className="-mb-[0.12em] block bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text pb-[0.12em] leading-[1.12] text-transparent">
               Engineer
             </span>
           </h1>
@@ -307,9 +308,14 @@ export function HeroSection() {
               </a>
             ))}
           </div>
-        </div>
+        </RevealOnScroll>
 
-        <div className="order-2 block lg:translate-x-16 xl:translate-x-20">
+        <RevealOnScroll
+          className="order-2 block lg:translate-x-16 xl:translate-x-20"
+          delay={120}
+          y={28}
+          scale={0.99}
+        >
           <div
             ref={gifFieldRef}
             onPointerMove={handleGifPointerMove}
@@ -328,7 +334,7 @@ export function HeroSection() {
               className="hero-gif-image relative z-10 w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"
             />
           </div>
-        </div>
+        </RevealOnScroll>
       </div>
     </section>
   );
