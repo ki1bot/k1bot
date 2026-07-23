@@ -7,15 +7,42 @@ export function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    function handleScroll() {
-      setIsVisible(window.scrollY > 600);
+    let animationFrameId = 0;
+    let currentVisibility = window.scrollY > 600;
+
+    setIsVisible(currentVisibility);
+
+    function updateVisibility() {
+      animationFrameId = 0;
+
+      const nextVisibility = window.scrollY > 600;
+
+      if (nextVisibility === currentVisibility) {
+        return;
+      }
+
+      currentVisibility = nextVisibility;
+      setIsVisible(nextVisibility);
     }
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll);
+    function handleScroll() {
+      if (animationFrameId) {
+        return;
+      }
+
+      animationFrameId = window.requestAnimationFrame(updateVisibility);
+    }
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+
+      if (animationFrameId) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
     };
   }, []);
 

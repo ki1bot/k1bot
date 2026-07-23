@@ -3,6 +3,17 @@ const ASSET_CACHE_CONTROL =
   "public, max-age=31536000, s-maxage=31536000, immutable";
 
 const nextConfig = {
+  poweredByHeader: false,
+
+  experimental: {
+    inlineCss: true,
+  },
+
+  images: {
+    qualities: [60, 75],
+    minimumCacheTTL: 31536000,
+  },
+
   async headers() {
     return [
       {
