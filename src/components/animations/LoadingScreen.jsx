@@ -1,11 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { assetUrl } from "@/lib/supabase-storage";
-
-const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
 
 const loadingIcons = [
   {
@@ -31,33 +28,28 @@ export function LoadingScreen() {
 
   useEffect(() => {
     const htmlElement = document.documentElement;
-    const isMobile = window.matchMedia(MOBILE_MEDIA_QUERY).matches;
-    const exitDelay = isMobile ? 1600 : 2300;
-    const removeDelay = isMobile ? 2300 : 3000;
 
     document.body.classList.add("portfolio-loading-active");
 
-    const exitTimer = window.setTimeout(() => {
+    const exitTimer = setTimeout(() => {
       setIsLeaving(true);
       htmlElement.classList.remove("portfolio-is-loading");
-    }, exitDelay);
+    }, 2300);
 
-    const removeTimer = window.setTimeout(() => {
+    const removeTimer = setTimeout(() => {
       setIsVisible(false);
       document.body.classList.remove("portfolio-loading-active");
-    }, removeDelay);
+    }, 3000);
 
     return () => {
-      window.clearTimeout(exitTimer);
-      window.clearTimeout(removeTimer);
+      clearTimeout(exitTimer);
+      clearTimeout(removeTimer);
       htmlElement.classList.remove("portfolio-is-loading");
       document.body.classList.remove("portfolio-loading-active");
     };
   }, []);
 
-  if (!isVisible) {
-    return null;
-  }
+  if (!isVisible) return null;
 
   return (
     <div
@@ -80,16 +72,11 @@ export function LoadingScreen() {
                 "--loader-icon-delay": icon.delay,
               }}
             >
-              <Image
+              <img
                 src={icon.src}
                 alt=""
-                width={48}
-                height={48}
-                sizes="(min-width: 640px) 40px, 35px"
-                quality={60}
-                loading="eager"
                 className="portfolio-loader-image-icon"
-                draggable={false}
+                draggable="false"
               />
             </div>
           ))}

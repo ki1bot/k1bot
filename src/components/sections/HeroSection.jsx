@@ -40,6 +40,9 @@ const heroSocials = [
 
 const HERO_GIF_SOURCE = assetUrl("projects/coding.gif");
 
+const TRANSPARENT_GIF =
+  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -134,6 +137,51 @@ function useTypewriter(
 export function HeroSection() {
   const typedRole = useTypewriter(heroRoles);
   const gifFieldRef = useRef(null);
+  const [shouldLoadGif, setShouldLoadGif] = useState(false);
+
+  useEffect(() => {
+    const gifField = gifFieldRef.current;
+
+    if (!gifField) {
+      return;
+    }
+
+    const desktopMediaQuery = window.matchMedia("(min-width: 1024px)");
+
+    if (desktopMediaQuery.matches) {
+      setShouldLoadGif(true);
+      return;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoadGif(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const isVisible = entries.some((entry) => entry.isIntersecting);
+
+        if (!isVisible) {
+          return;
+        }
+
+        setShouldLoadGif(true);
+        observer.disconnect();
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.01,
+      },
+    );
+
+    observer.observe(gifField);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   function handleGifPointerMove(event) {
     const element = event.currentTarget;
@@ -275,15 +323,15 @@ export function HeroSection() {
             onPointerCancel={handleGifPointerLeave}
             className="hero-gif-field relative mx-auto flex w-full max-w-[320px] cursor-pointer items-center justify-center bg-transparent sm:max-w-[420px] md:max-w-[520px] lg:max-w-[720px]"
           >
-            <Image
-              src={HERO_GIF_SOURCE}
+            <img
+              src={shouldLoadGif ? HERO_GIF_SOURCE : TRANSPARENT_GIF}
               alt="Frontend development illustration"
               width={690}
               height={690}
-              preload
-              unoptimized
-              draggable={false}
-              className="hero-gif-image relative z-10 h-auto w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"
+              loading={shouldLoadGif ? "eager" : "lazy"}
+              decoding="async"
+              fetchPriority={shouldLoadGif ? "high" : "low"}
+              className="hero-gif-image relative z-10 w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"
             />
           </div>
         </RevealOnScroll>
