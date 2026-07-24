@@ -1,28 +1,55 @@
 "use client";
 
-import { FileText, FolderKanban } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { ExternalLink, FileText, FolderKanban } from "lucide-react";
 
 import { PERSONAL_INFO, TECH_STACK } from "@/lib/constants";
+import { assetUrl } from "@/lib/supabase-storage";
 
 const CV_DRIVE_URL =
   "https://drive.google.com/drive/folders/1SmhgvKkpRICHDnnvEH3dTHS-72bmsp16?usp=sharing";
 
-const mainStacks = [
-  "HTML",
-  "CSS",
-  "JavaScript",
-  "TypeScript",
-  "Tailwind CSS",
-  "React",
-];
+const GITHUB_USERNAME = "ki1bot";
+const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
+const GITHUB_CONTRIBUTIONS_URL = `https://ghchart.rshah.org/8b5cf6/${GITHUB_USERNAME}`;
+const GITHUB_ICON = assetUrl("media/github.png");
+
+const CONTRIBUTION_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
 
 export function ProfileSummaryCard({
   projectsCount = 0,
   certificatesCount = 0,
 }) {
-  const selectedStacks = mainStacks
-    .map((stackName) => TECH_STACK.find((tech) => tech.name === stackName))
-    .filter(Boolean);
+  const [totalContributions, setTotalContributions] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadGitHubContributions() {
+      try {
+        const response = await fetch("/api/github-contributions", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        if (Number.isInteger(data.totalContributions)) {
+          setTotalContributions(data.totalContributions);
+        }
+      } catch {}
+    }
+
+    loadGitHubContributions();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   const stats = [
     {
@@ -39,6 +66,12 @@ export function ProfileSummaryCard({
     },
   ];
 
+  const contributionText = Number.isInteger(totalContributions)
+    ? `${CONTRIBUTION_NUMBER_FORMATTER.format(
+        totalContributions,
+      )} contributions in the last year`
+    : "Contributions in the last year";
+
   function handleViewProjectsClick(event) {
     event.preventDefault();
 
@@ -50,6 +83,7 @@ export function ProfileSummaryCard({
     }
 
     const navbarOffset = window.innerWidth < 768 ? 84 : 115;
+
     const projectsPosition =
       projectsSection.getBoundingClientRect().top +
       window.scrollY -
@@ -69,29 +103,33 @@ export function ProfileSummaryCard({
 
       <div className="relative rounded-[1.75rem] border border-white/10 bg-white/[0.08] p-3 shadow-2xl shadow-blue-950/30 backdrop-blur-2xl sm:rounded-[2.5rem] sm:p-5">
         <div className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-slate-950/35 px-5 pb-5 pt-10 sm:overflow-visible sm:rounded-[2rem] sm:p-8 md:p-10">
-          <div className="relative mx-auto flex size-36 items-center justify-center sm:size-48 md:size-56">
+          <div className="relative mx-auto mt-4 flex size-36 items-center justify-center sm:mt-5 sm:size-48 md:mt-6 md:size-56">
             <div className="absolute inset-0 rounded-full border border-blue-200/18 sm:border-blue-200/15" />
+
             <div className="absolute inset-[-10px] rounded-full border border-blue-300/16 sm:inset-[-18px] sm:border-blue-300/12" />
+
             <div className="absolute inset-[-20px] rounded-full border border-blue-300/12 sm:inset-[-36px] sm:border-blue-300/10" />
 
             <div className="absolute right-2 top-4 size-3.5 rounded-full bg-cyan-300 shadow-lg shadow-cyan-300/60 sm:right-3 sm:top-5 sm:size-5" />
+
             <div className="absolute bottom-7 left-2 size-3 rounded-full bg-blue-300 shadow-lg shadow-blue-300/60 sm:bottom-8 sm:left-2 sm:size-4" />
 
             <div className="size-24 overflow-hidden rounded-full border border-blue-200/30 bg-blue-950/40 p-1.5 shadow-2xl shadow-blue-500/20 sm:size-32 sm:p-2 md:size-40">
-              <img
-                src={PERSONAL_INFO.profileImage}
-                alt={PERSONAL_INFO.name}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full rounded-full object-cover"
-              />
+              <div className="relative h-full w-full overflow-hidden rounded-full">
+                <Image
+                  src={PERSONAL_INFO.profileImage}
+                  alt={PERSONAL_INFO.name}
+                  fill
+                  sizes="(max-width: 639px) 84px, (max-width: 767px) 112px, 144px"
+                  loading="lazy"
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="mt-7 text-center sm:mt-8">
-            <p className="text-sm text-blue-200/75 sm:text-base">Portofolio</p>
-
-            <h2 className="mx-auto mt-3 max-w-sm text-2xl font-black leading-tight text-white sm:text-3xl md:text-[2.2rem]">
+          <div className="mt-12 px-1 text-center sm:mt-14 sm:px-2 md:mt-16">
+            <h2 className="mx-auto whitespace-nowrap text-[1.15rem] font-black leading-[1.15] tracking-[-0.025em] text-white min-[390px]:text-[1.3rem] min-[440px]:text-[1.45rem] sm:text-[1.6rem] md:text-[1.75rem]">
               {PERSONAL_INFO.role}
             </h2>
 
@@ -118,27 +156,77 @@ export function ProfileSummaryCard({
           </div>
 
           <div className="mt-7 sm:mt-8">
-            <p className="mb-4 text-sm font-bold text-blue-100 sm:text-base">
-              Main Stack
-            </p>
-
-            <div className="grid grid-cols-3 gap-3 min-[420px]:grid-cols-6">
-              {selectedStacks.map((tech) => (
-                <div
-                  key={tech.name}
-                  className="flex h-14 w-full items-center justify-center rounded-2xl border border-white/10 bg-white/10 p-3 shadow-lg shadow-blue-950/10 transition hover:-translate-y-1 hover:bg-white/15 min-[420px]:w-14 md:h-16 md:w-16"
-                  title={tech.name === "React" ? "ReactJS" : tech.name}
-                >
-                  <img
-                    src={tech.icon}
-                    alt={tech.name === "React" ? "ReactJS" : tech.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-contain"
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-9 items-center justify-center rounded-xl border border-violet-300/15 bg-violet-500/10">
+                  <Image
+                    src={GITHUB_ICON}
+                    alt="GitHub"
+                    width={20}
+                    height={20}
+                    sizes="20px"
+                    className="size-5 object-contain"
                   />
                 </div>
-              ))}
+
+                <p className="text-sm font-bold text-blue-100 sm:text-base">
+                  GitHub Contributions
+                </p>
+              </div>
+
+              <a
+                href={GITHUB_PROFILE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="group/github inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 transition duration-300 hover:text-violet-200 sm:text-sm"
+              >
+                View on GitHub
+                <ExternalLink className="size-3.5 transition duration-300 group-hover/github:-translate-y-0.5 group-hover/github:translate-x-0.5" />
+              </a>
             </div>
+
+            <a
+              href={GITHUB_PROFILE_URL}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Lihat kontribusi GitHub ${GITHUB_USERNAME}`}
+              className="group/contributions block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] shadow-xl shadow-blue-950/20 transition duration-300 hover:-translate-y-1 hover:border-violet-300/25 hover:bg-white/[0.09] hover:shadow-violet-500/10"
+            >
+              <div className="overflow-hidden bg-[#f6f8fa] p-3 sm:p-4">
+                <div
+                  role="img"
+                  aria-label={`Grafik kontribusi GitHub ${GITHUB_USERNAME}`}
+                  className="aspect-[663/104] w-full bg-contain bg-center bg-no-repeat transition duration-500 group-hover/contributions:scale-[1.015]"
+                  style={{
+                    backgroundImage: `url("${GITHUB_CONTRIBUTIONS_URL}")`,
+                  }}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-4 py-3">
+                <span className="text-[11px] font-medium text-blue-100/60 sm:text-xs">
+                  {contributionText}
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-medium text-blue-100/60 sm:text-[11px]">
+                    Less
+                  </span>
+
+                  <div className="flex items-center gap-1">
+                    <span className="size-3 rounded-[3px] bg-[#ebedf0]" />
+                    <span className="size-3 rounded-[3px] bg-[#ddd6fe]" />
+                    <span className="size-3 rounded-[3px] bg-[#a78bfa]" />
+                    <span className="size-3 rounded-[3px] bg-[#7c3aed]" />
+                    <span className="size-3 rounded-[3px] bg-[#4c1d95]" />
+                  </div>
+
+                  <span className="text-[10px] font-medium text-blue-100/60 sm:text-[11px]">
+                    More
+                  </span>
+                </div>
+              </div>
+            </a>
           </div>
         </div>
       </div>
