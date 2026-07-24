@@ -15,21 +15,34 @@ const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
 const GITHUB_CONTRIBUTIONS_URL = `https://ghchart.rshah.org/8b5cf6/${GITHUB_USERNAME}`;
 const GITHUB_ICON = assetUrl("media/github.png");
 
+const STATIC_GITHUB_CONTRIBUTIONS = 417;
+const GITHUB_REFRESH_INTERVAL = 1000;
+
 const CONTRIBUTION_NUMBER_FORMATTER = new Intl.NumberFormat("en-US");
 
 export function ProfileSummaryCard({
   projectsCount = 0,
   certificatesCount = 0,
 }) {
-  const [totalContributions, setTotalContributions] = useState(null);
+  const [totalContributions, setTotalContributions] = useState(
+    STATIC_GITHUB_CONTRIBUTIONS,
+  );
 
   useEffect(() => {
-    const controller = new AbortController();
+    let isMounted = true;
+    let activeController = null;
 
     async function loadGitHubContributions() {
+      activeController?.abort();
+      activeController = new AbortController();
+
       try {
         const response = await fetch("/api/github-contributions", {
-          signal: controller.signal,
+          signal: activeController.signal,
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
         });
 
         if (!response.ok) {
@@ -38,7 +51,11 @@ export function ProfileSummaryCard({
 
         const data = await response.json();
 
-        if (Number.isInteger(data.totalContributions)) {
+        if (
+          isMounted &&
+          data.username === GITHUB_USERNAME &&
+          Number.isInteger(data.totalContributions)
+        ) {
           setTotalContributions(data.totalContributions);
         }
       } catch {}
@@ -46,8 +63,15 @@ export function ProfileSummaryCard({
 
     loadGitHubContributions();
 
+    const intervalId = window.setInterval(
+      loadGitHubContributions,
+      GITHUB_REFRESH_INTERVAL,
+    );
+
     return () => {
-      controller.abort();
+      isMounted = false;
+      activeController?.abort();
+      window.clearInterval(intervalId);
     };
   }, []);
 
@@ -66,11 +90,9 @@ export function ProfileSummaryCard({
     },
   ];
 
-  const contributionText = Number.isInteger(totalContributions)
-    ? `${CONTRIBUTION_NUMBER_FORMATTER.format(
-        totalContributions,
-      )} contributions in the last year`
-    : "Contributions in the last year";
+  const contributionText = `${CONTRIBUTION_NUMBER_FORMATTER.format(
+    totalContributions,
+  )} contributions in the last year`;
 
   function handleViewProjectsClick(event) {
     event.preventDefault();
@@ -129,9 +151,13 @@ export function ProfileSummaryCard({
           </div>
 
           <div className="mt-12 px-1 text-center sm:mt-14 sm:px-2 md:mt-16">
-            <h2 className="mx-auto whitespace-nowrap text-[1.15rem] font-black leading-[1.15] tracking-[-0.025em] text-white min-[390px]:text-[1.3rem] min-[440px]:text-[1.45rem] sm:text-[1.6rem] md:text-[1.75rem]">
-              {PERSONAL_INFO.role}
+            <h2 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl md:text-4xl">
+              {PERSONAL_INFO.name}
             </h2>
+
+            <p className="mx-auto mt-3 whitespace-nowrap text-[1.15rem] font-black leading-[1.15] tracking-[-0.025em] text-blue-100 min-[390px]:text-[1.3rem] min-[440px]:text-[1.45rem] sm:text-[1.6rem] md:text-[1.75rem]">
+              {PERSONAL_INFO.role}
+            </p>
 
             <p className="mt-4 text-sm text-blue-100/65 sm:text-base">
               {PERSONAL_INFO.location}

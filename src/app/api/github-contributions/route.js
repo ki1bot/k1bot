@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 const GITHUB_USERNAME = "ki1bot";
 const GITHUB_CONTRIBUTIONS_URL = `https://github.com/users/${GITHUB_USERNAME}/contributions`;
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function parseContributionTotalFromHeading(html) {
   const match = html.match(
     /([\d,.]+)\s+contributions?\s+in\s+the\s+last\s+year/i,
@@ -39,18 +42,22 @@ export async function GET() {
         "Accept-Language": "en-US,en;q=0.9",
         "User-Agent": "k1bot-portfolio",
       },
-      next: {
-        revalidate: 3600,
-      },
+      cache: "no-store",
     });
 
     if (!response.ok) {
       return NextResponse.json(
         {
+          username: GITHUB_USERNAME,
           error: "Gagal mengambil data kontribusi GitHub.",
         },
         {
           status: response.status,
+          headers: {
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
         },
       );
     }
@@ -64,10 +71,16 @@ export async function GET() {
     if (!Number.isInteger(totalContributions)) {
       return NextResponse.json(
         {
+          username: GITHUB_USERNAME,
           error: "Jumlah kontribusi GitHub tidak ditemukan.",
         },
         {
           status: 502,
+          headers: {
+            "Cache-Control": "no-store, no-cache, must-revalidate",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
         },
       );
     }
@@ -80,18 +93,25 @@ export async function GET() {
       },
       {
         headers: {
-          "Cache-Control":
-            "public, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
         },
       },
     );
   } catch {
     return NextResponse.json(
       {
+        username: GITHUB_USERNAME,
         error: "Terjadi kesalahan saat mengambil kontribusi GitHub.",
       },
       {
         status: 500,
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
       },
     );
   }
