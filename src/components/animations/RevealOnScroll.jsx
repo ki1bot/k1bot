@@ -4,6 +4,57 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+const OBSERVER_OPTIONS = {
+  threshold: 0.08,
+  rootMargin: "0px 0px -40px 0px",
+};
+
+let observerPool = null;
+
+function getObserverPool() {
+  if (observerPool) {
+    return observerPool;
+  }
+
+  const callbacks = new Map();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      callbacks.get(entry.target)?.(entry);
+    });
+  }, OBSERVER_OPTIONS);
+
+  observerPool = {
+    callbacks,
+    observer,
+  };
+
+  return observerPool;
+}
+
+function observeElement(element, callback) {
+  const pool = getObserverPool();
+  let isActive = true;
+
+  pool.callbacks.set(element, callback);
+  pool.observer.observe(element);
+
+  return () => {
+    if (!isActive) {
+      return;
+    }
+
+    isActive = false;
+    pool.callbacks.delete(element);
+    pool.observer.unobserve(element);
+
+    if (pool.callbacks.size === 0) {
+      pool.observer.disconnect();
+      observerPool = null;
+    }
+  };
+}
+
 export function RevealOnScroll({
   children,
   className,
@@ -14,6 +65,7 @@ export function RevealOnScroll({
   as: Component = "div",
 }) {
   const elementRef = useRef(null);
+  const hasRevealedRef = useRef(false);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -28,42 +80,40 @@ export function RevealOnScroll({
     ).matches;
 
     if (prefersReducedMotion) {
-      setIsVisible(true);
       return;
     }
 
     if (!("IntersectionObserver" in window)) {
-      setIsVisible(true);
-      return;
+      const animationFrameId = window.requestAnimationFrame(() => {
+        hasRevealedRef.current = true;
+        setIsVisible(true);
+      });
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
+    let stopObserving = () => {};
 
-          if (once) {
-            observer.unobserve(element);
-          }
+    stopObserving = observeElement(element, (entry) => {
+      if (entry.isIntersecting) {
+        hasRevealedRef.current = true;
+        setIsVisible(true);
 
-          return;
+        if (once) {
+          stopObserving();
         }
 
-        if (!once) {
-          setIsVisible(false);
-        }
-      },
-      {
-        threshold: 0.08,
-        rootMargin: "0px 0px -40px 0px",
-      },
-    );
+        return;
+      }
 
-    observer.observe(element);
+      if (!once && hasRevealedRef.current) {
+        setIsVisible(false);
+      }
+    });
 
-    return () => {
-      observer.disconnect();
-    };
+    return stopObserving;
   }, [once]);
 
   return (

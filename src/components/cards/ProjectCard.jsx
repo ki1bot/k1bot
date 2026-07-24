@@ -1,5 +1,7 @@
 "use client";
 
+import { memo, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -9,8 +11,13 @@ import { createProjectSlug } from "@/lib/project-slug";
 
 const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
 
-export function ProjectCard({ project }) {
+function canUseNextImage(imageUrl) {
+  return imageUrl.startsWith("/") && !/\.(?:gif|svg)(?:\?.*)?$/i.test(imageUrl);
+}
+
+export const ProjectCard = memo(function ProjectCard({ project }) {
   const router = useRouter();
+  const hasPrefetchedRef = useRef(false);
 
   const projectTitle = project.title || "Untitled Project";
   const projectDescription =
@@ -26,6 +33,11 @@ export function ProjectCard({ project }) {
     : `/project?slug=${encodeURIComponent(projectSlug)}`;
 
   function prefetchProjectDetail() {
+    if (hasPrefetchedRef.current) {
+      return;
+    }
+
+    hasPrefetchedRef.current = true;
     router.prefetch(projectDetailUrl);
   }
 
@@ -57,13 +69,25 @@ export function ProjectCard({ project }) {
       <div className="p-4 pb-0 sm:p-5 sm:pb-0">
         <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-950/50 sm:aspect-[16/9]">
           {project.img ? (
-            <img
-              src={project.img}
-              alt={projectTitle}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-105"
-            />
+            canUseNextImage(project.img) ? (
+              <Image
+                src={project.img}
+                alt={projectTitle}
+                fill
+                sizes="(max-width: 767px) calc(100vw - 64px), (max-width: 1279px) calc(50vw - 52px), 390px"
+                quality={75}
+                loading="lazy"
+                className="object-cover object-top transition duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <img
+                src={project.img}
+                alt={projectTitle}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-105"
+              />
+            )
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-blue-100/60">
               No Image
@@ -105,7 +129,7 @@ export function ProjectCard({ project }) {
 
           <Link
             href={projectDetailUrl}
-            prefetch={true}
+            prefetch={false}
             onMouseEnter={prefetchProjectDetail}
             onFocus={prefetchProjectDetail}
             onTouchStart={prefetchProjectDetail}
@@ -120,4 +144,4 @@ export function ProjectCard({ project }) {
       </div>
     </Card>
   );
-}
+});

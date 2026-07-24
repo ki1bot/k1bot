@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Award,
   ChevronDown,
@@ -36,28 +37,27 @@ const tabs = [
   },
 ];
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(true);
+function isVectorImage(imageUrl) {
+  return /\.svg(?:\?.*)?$/i.test(imageUrl);
+}
 
+function useResetExpansionOnBreakpointChange(resetExpansion) {
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
 
-    function handleChange(event) {
-      setIsMobile(event.matches);
+    function handleChange() {
+      resetExpansion();
     }
 
-    setIsMobile(mediaQuery.matches);
     mediaQuery.addEventListener("change", handleChange);
 
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
-  }, []);
-
-  return isMobile;
+  }, [resetExpansion]);
 }
 
-function TechStackGrid() {
+const TechStackGrid = memo(function TechStackGrid() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
       {TECH_STACK.map((tech, index) => (
@@ -65,11 +65,14 @@ function TechStackGrid() {
           <div className="group rounded-[1.25rem] border border-white/10 bg-white/[0.06] p-4 shadow-xl shadow-blue-950/10 backdrop-blur-md transition duration-300 hover:-translate-y-2 hover:border-violet-300/25 hover:bg-white/[0.1] hover:shadow-violet-500/15 sm:rounded-[1.5rem] sm:p-5">
             <div className="flex min-h-[124px] flex-col items-center justify-center gap-3 sm:min-h-[150px] sm:gap-4">
               <div className="flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] p-3 transition duration-300 group-hover:scale-110 group-hover:bg-violet-500/15 sm:size-16 sm:rounded-3xl">
-                <img
+                <Image
                   src={tech.icon}
                   alt={tech.name}
+                  width={64}
+                  height={64}
+                  sizes="64px"
                   loading="lazy"
-                  decoding="async"
+                  unoptimized={isVectorImage(tech.icon)}
                   className="h-full w-full object-contain transition duration-300 group-hover:rotate-6"
                 />
               </div>
@@ -83,18 +86,32 @@ function TechStackGrid() {
       ))}
     </div>
   );
-}
+});
 
 function SeeMoreButton({
   isExpanded,
-  hiddenCount,
+  mobileHiddenCount,
+  desktopHiddenCount,
   onClick,
   expandedLabel = "Show Less",
 }) {
   const Icon = isExpanded ? ChevronUp : ChevronDown;
+  const showOnMobile = mobileHiddenCount > 0;
+  const showOnDesktop = desktopHiddenCount > 0;
+
+  if (!showOnMobile && !showOnDesktop) {
+    return null;
+  }
+
+  const visibilityClass =
+    showOnMobile && showOnDesktop
+      ? "flex"
+      : showOnMobile
+        ? "flex md:hidden"
+        : "hidden md:flex";
 
   return (
-    <div className="mt-8 flex justify-center sm:mt-10">
+    <div className={`mt-8 justify-center sm:mt-10 ${visibilityClass}`}>
       <button
         type="button"
         onClick={onClick}
@@ -104,7 +121,23 @@ function SeeMoreButton({
         <span className="see-more-button-glow" />
 
         <span className="relative z-10">
-          {isExpanded ? expandedLabel : `See More ${hiddenCount}`}
+          {isExpanded ? (
+            expandedLabel
+          ) : (
+            <>
+              {showOnMobile && (
+                <span className={showOnDesktop ? "md:hidden" : undefined}>
+                  See More {mobileHiddenCount}
+                </span>
+              )}
+
+              {showOnDesktop && (
+                <span className={showOnMobile ? "hidden md:inline" : undefined}>
+                  See More {desktopHiddenCount}
+                </span>
+              )}
+            </>
+          )}
         </span>
 
         <span className="relative z-10 flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-violet-100 transition duration-300 group-hover:scale-110 group-hover:bg-violet-500/20 sm:size-9">
@@ -115,19 +148,40 @@ function SeeMoreButton({
   );
 }
 
-function ProjectsPanel({ projects }) {
+const ProjectsPanel = memo(function ProjectsPanel({ projects }) {
+  const projectItems = useMemo(() => {
+    return Array.isArray(projects) ? projects : [];
+  }, [projects]);
+
   const [isExpanded, setIsExpanded] = useState(false);
-  const isMobile = useIsMobile();
 
-  const visibleItemsLimit = isMobile
-    ? MOBILE_VISIBLE_ITEMS_LIMIT
-    : DESKTOP_VISIBLE_ITEMS_LIMIT;
-
-  useEffect(() => {
+  const resetExpansion = useCallback(() => {
     setIsExpanded(false);
-  }, [isMobile]);
+  }, []);
 
-  if (!projects?.length) {
+  useResetExpansionOnBreakpointChange(resetExpansion);
+
+  const visibleProjects = useMemo(() => {
+    return isExpanded
+      ? projectItems
+      : projectItems.slice(0, DESKTOP_VISIBLE_ITEMS_LIMIT);
+  }, [isExpanded, projectItems]);
+
+  const mobileHiddenCount = Math.max(
+    projectItems.length - MOBILE_VISIBLE_ITEMS_LIMIT,
+    0,
+  );
+
+  const desktopHiddenCount = Math.max(
+    projectItems.length - DESKTOP_VISIBLE_ITEMS_LIMIT,
+    0,
+  );
+
+  const toggleExpansion = useCallback(() => {
+    setIsExpanded((current) => !current);
+  }, []);
+
+  if (!projectItems.length) {
     return (
       <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 text-center text-sm text-blue-100/65 sm:p-8 sm:text-base">
         Belum ada project yang ditampilkan.
@@ -135,66 +189,75 @@ function ProjectsPanel({ projects }) {
     );
   }
 
-  const shouldShowButton = projects.length > visibleItemsLimit;
-
-  const visibleProjects = isExpanded
-    ? projects
-    : projects.slice(0, visibleItemsLimit);
-
-  const hiddenProjectsCount = Math.max(projects.length - visibleItemsLimit, 0);
-
   return (
     <div>
       <div className="grid gap-5 md:grid-cols-2 md:gap-6 xl:grid-cols-3">
         {visibleProjects.map((project, index) => (
-          <RevealOnScroll key={project.id ?? project.title} delay={index * 70}>
+          <RevealOnScroll
+            key={project.id ?? project.title}
+            delay={index * 70}
+            className={
+              !isExpanded && index >= MOBILE_VISIBLE_ITEMS_LIMIT
+                ? "hidden md:block"
+                : undefined
+            }
+          >
             <ProjectCard project={project} />
           </RevealOnScroll>
         ))}
       </div>
 
-      {shouldShowButton && (
-        <SeeMoreButton
-          isExpanded={isExpanded}
-          hiddenCount={hiddenProjectsCount}
-          onClick={() => setIsExpanded((current) => !current)}
-          expandedLabel="Show Less"
-        />
-      )}
+      <SeeMoreButton
+        isExpanded={isExpanded}
+        mobileHiddenCount={mobileHiddenCount}
+        desktopHiddenCount={desktopHiddenCount}
+        onClick={toggleExpansion}
+        expandedLabel="Show Less"
+      />
     </div>
   );
-}
+});
 
-function CertificatesPanel({ certificates }) {
+const CertificatesPanel = memo(function CertificatesPanel({ certificates }) {
+  const certificateItems = useMemo(() => {
+    return Array.isArray(certificates) ? certificates : [];
+  }, [certificates]);
+
   const [isExpanded, setIsExpanded] = useState(false);
-  const isMobile = useIsMobile();
 
-  const visibleItemsLimit = isMobile
-    ? MOBILE_VISIBLE_ITEMS_LIMIT
-    : DESKTOP_VISIBLE_ITEMS_LIMIT;
-
-  useEffect(() => {
+  const resetExpansion = useCallback(() => {
     setIsExpanded(false);
-  }, [isMobile]);
+  }, []);
 
-  if (!certificates?.length) {
+  useResetExpansionOnBreakpointChange(resetExpansion);
+
+  const visibleCertificates = useMemo(() => {
+    return isExpanded
+      ? certificateItems
+      : certificateItems.slice(0, DESKTOP_VISIBLE_ITEMS_LIMIT);
+  }, [certificateItems, isExpanded]);
+
+  const mobileHiddenCount = Math.max(
+    certificateItems.length - MOBILE_VISIBLE_ITEMS_LIMIT,
+    0,
+  );
+
+  const desktopHiddenCount = Math.max(
+    certificateItems.length - DESKTOP_VISIBLE_ITEMS_LIMIT,
+    0,
+  );
+
+  const toggleExpansion = useCallback(() => {
+    setIsExpanded((current) => !current);
+  }, []);
+
+  if (!certificateItems.length) {
     return (
       <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-6 text-center text-sm text-blue-100/65 sm:p-8 sm:text-base">
         Belum ada sertifikat yang ditampilkan.
       </div>
     );
   }
-
-  const shouldShowButton = certificates.length > visibleItemsLimit;
-
-  const visibleCertificates = isExpanded
-    ? certificates
-    : certificates.slice(0, visibleItemsLimit);
-
-  const hiddenCertificatesCount = Math.max(
-    certificates.length - visibleItemsLimit,
-    0,
-  );
 
   return (
     <div>
@@ -203,23 +266,27 @@ function CertificatesPanel({ certificates }) {
           <RevealOnScroll
             key={certificate.id ?? certificate.title ?? certificate.img}
             delay={index * 70}
+            className={
+              !isExpanded && index >= MOBILE_VISIBLE_ITEMS_LIMIT
+                ? "hidden md:block"
+                : undefined
+            }
           >
             <CertificateCard certificate={certificate} />
           </RevealOnScroll>
         ))}
       </div>
 
-      {shouldShowButton && (
-        <SeeMoreButton
-          isExpanded={isExpanded}
-          hiddenCount={hiddenCertificatesCount}
-          onClick={() => setIsExpanded((current) => !current)}
-          expandedLabel="Show Less"
-        />
-      )}
+      <SeeMoreButton
+        isExpanded={isExpanded}
+        mobileHiddenCount={mobileHiddenCount}
+        desktopHiddenCount={desktopHiddenCount}
+        onClick={toggleExpansion}
+        expandedLabel="Show Less"
+      />
     </div>
   );
-}
+});
 
 export function PortfolioShowcaseSection({ projects = [], certificates = [] }) {
   const [activeTab, setActiveTab] = useState("projects");
@@ -229,6 +296,17 @@ export function PortfolioShowcaseSection({ projects = [], certificates = [] }) {
       sessionStorage.removeItem(PROJECT_RETURN_STORAGE_KEY);
     } catch {}
   }, []);
+
+  const selectTab = useCallback(
+    (tabKey) => {
+      if (tabKey === activeTab) {
+        return;
+      }
+
+      setActiveTab(tabKey);
+    },
+    [activeTab],
+  );
 
   return (
     <section id="projects" className="border-t border-white/10 py-20 md:py-24">
@@ -248,7 +326,7 @@ export function PortfolioShowcaseSection({ projects = [], certificates = [] }) {
 
         <RevealOnScroll delay={100} y={20}>
           <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-2.5 shadow-2xl shadow-blue-950/20 backdrop-blur-md sm:mt-12 sm:rounded-[2rem] sm:p-4">
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3" role="tablist">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
@@ -257,7 +335,9 @@ export function PortfolioShowcaseSection({ projects = [], certificates = [] }) {
                   <button
                     key={tab.key}
                     type="button"
-                    onClick={() => setActiveTab(tab.key)}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => selectTab(tab.key)}
                     className={`group flex min-h-[74px] flex-col items-center justify-center rounded-[1.05rem] border px-2 py-3 text-center transition duration-300 sm:min-h-[96px] sm:rounded-[1.4rem] sm:px-6 sm:py-5 ${
                       isActive
                         ? "border-violet-300/20 bg-[linear-gradient(135deg,rgba(124,58,237,0.28),rgba(255,255,255,0.08))] shadow-xl shadow-violet-500/10"
@@ -288,7 +368,7 @@ export function PortfolioShowcaseSection({ projects = [], certificates = [] }) {
           </div>
         </RevealOnScroll>
 
-        <div className="mt-8 sm:mt-10">
+        <div className="mt-8 sm:mt-10" role="tabpanel">
           {activeTab === "projects" && <ProjectsPanel projects={projects} />}
 
           {activeTab === "certificates" && (

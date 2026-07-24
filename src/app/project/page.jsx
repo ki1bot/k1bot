@@ -115,7 +115,7 @@ export default async function ProjectDetailPage({ searchParams }) {
           <div className="mt-10 grid gap-10 lg:mt-14 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-14">
             <div>
               <div className="detail-reveal detail-delay-1">
-                <h1 className="max-w-2xl bg-gradient-to-r from-blue-100 via-violet-100 to-fuchsia-200 bg-clip-text text-3xl font-black leading-[1.08] tracking-tight text-transparent min-[390px]:text-4xl md:text-5xl lg:text-6xl">
+                <h1 className="-mb-[0.16em] max-w-2xl overflow-visible bg-gradient-to-r from-blue-100 via-violet-100 to-fuchsia-200 bg-clip-text pb-[0.16em] text-3xl font-black leading-[1.08] tracking-tight text-transparent min-[390px]:text-4xl md:text-5xl lg:text-6xl">
                   {projectTitle}
                 </h1>
 

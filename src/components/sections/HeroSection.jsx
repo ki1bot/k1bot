@@ -147,15 +147,28 @@ export function HeroSection() {
     }
 
     const desktopMediaQuery = window.matchMedia("(min-width: 1024px)");
+    let animationFrameId = 0;
+
+    function scheduleGifLoad() {
+      animationFrameId = window.requestAnimationFrame(() => {
+        setShouldLoadGif(true);
+      });
+    }
 
     if (desktopMediaQuery.matches) {
-      setShouldLoadGif(true);
-      return;
+      scheduleGifLoad();
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
     }
 
     if (!("IntersectionObserver" in window)) {
-      setShouldLoadGif(true);
-      return;
+      scheduleGifLoad();
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
     }
 
     const observer = new IntersectionObserver(
@@ -179,6 +192,7 @@ export function HeroSection() {
     observer.observe(gifField);
 
     return () => {
+      window.cancelAnimationFrame(animationFrameId);
       observer.disconnect();
     };
   }, []);
@@ -323,14 +337,16 @@ export function HeroSection() {
             onPointerCancel={handleGifPointerLeave}
             className="hero-gif-field relative mx-auto flex w-full max-w-[320px] cursor-pointer items-center justify-center bg-transparent sm:max-w-[420px] md:max-w-[520px] lg:max-w-[720px]"
           >
-            <img
+            <Image
               src={shouldLoadGif ? HERO_GIF_SOURCE : TRANSPARENT_GIF}
               alt="Frontend development illustration"
               width={690}
               height={690}
+              sizes="(max-width: 639px) 320px, (max-width: 767px) 420px, (max-width: 1023px) 520px, 690px"
               loading={shouldLoadGif ? "eager" : "lazy"}
-              decoding="async"
               fetchPriority={shouldLoadGif ? "high" : "low"}
+              decoding="async"
+              unoptimized
               className="hero-gif-image relative z-10 w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"
             />
           </div>
