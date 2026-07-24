@@ -2,7 +2,7 @@ const ASSET_ALIAS_MAP = {
   "assets/default-avatar.jpg": "/assets/default-avatar.jpg",
   "assets/gradient-blue.jpg": "/assets/gradient-blue.jpg",
   "assets/logoKibot.png": "/assets/logoKibot.png",
-  "assets/rifqi.jpg": "/assets/rifqi.jpg",
+  // "assets/rifqi.jpg": "/assets/rifqi.jpg",
   "assets/Rifqii.png": "/assets/Rifqii.png",
 
   "media/github.png": "/assets/media/github.png",
