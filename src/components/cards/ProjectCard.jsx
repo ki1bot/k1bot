@@ -77,6 +77,7 @@ export const ProjectCard = memo(function ProjectCard({ project }) {
                 sizes="(max-width: 767px) calc(100vw - 64px), (max-width: 1279px) calc(50vw - 52px), 390px"
                 quality={75}
                 loading="lazy"
+                unoptimized
                 className="object-cover object-top transition duration-700 group-hover:scale-105"
               />
             ) : (
