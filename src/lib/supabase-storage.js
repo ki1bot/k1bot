@@ -3,6 +3,7 @@ const ASSET_ALIAS_MAP = {
   "assets/gradient-blue.jpg": "/assets/gradient-blue.jpg",
   "assets/logoKibot.png": "/assets/logoKibot.png",
   "assets/rifqi.jpg": "/assets/rifqi.jpg",
+  "assets/Rifqii.jpg": "/assets/Rifqii.jpg",
 
   "media/github.png": "/assets/media/github.png",
   "media/instagram.png": "/assets/media/instagram.png",
