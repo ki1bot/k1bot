@@ -15,8 +15,8 @@ export const PERSONAL_INFO = {
   youtube: "https://www.youtube.com/@kibot7659",
   tiktok: "https://www.tiktok.com/@kiibott_?_r=1&_t=ZS-96Aalc9CrbQ",
 
-  profileImage: assetUrl("assets/rifqi.jpg"),
-  profileImage: assetUrl("assets/Rifqii.jpg"),
+  // profileImage: assetUrl("assets/rifqi.jpg"),
+  profileImage: assetUrl("assets/Rifqii.png"),
   description:
     "Saya membangun website modern, responsif, dan terstruktur menggunakan React, Next.js, Tailwind CSS, Shadcn, dan Supabase.",
 };
