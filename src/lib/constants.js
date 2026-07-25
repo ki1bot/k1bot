@@ -172,7 +172,7 @@ export const FALLBACK_PROJECTS = [
     title: "Generate Website To PDF",
     description:
       "Website yang membantu pengguna mengubah halaman website menjadi file PDF dengan mudah. Pengguna cukup memasukkan alamat website, menentukan judul, nama file, dan jumlah halaman yang ingin dibuat.",
-    img: assetUrl("projects/GeneratePDF.png?v=2"),
+    img: assetUrl("projects/GeneratePDF.png"),
     link: "https://pdf-generate-nu.vercel.app/",
     github: "https://github.com/ki1bot/pdf-generate.git",
     features: [
