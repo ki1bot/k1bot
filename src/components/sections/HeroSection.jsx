@@ -18,7 +18,7 @@ const heroStacks = [
   "Next.Js",
 ];
 
-const heroRoles = ["Fullstack Web", "Mobile App"];
+const heroRoles = ["Fullstack Website", "Mobile Application"];
 
 const heroSocials = [
   {
