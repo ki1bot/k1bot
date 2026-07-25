@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Award,
   ChevronDown,
@@ -15,9 +15,11 @@ import { CertificateCard } from "@/components/cards/CertificateCard";
 import { ProjectCard } from "@/components/cards/ProjectCard";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 
-const MOBILE_VISIBLE_ITEMS_LIMIT = 3;
-const DESKTOP_VISIBLE_ITEMS_LIMIT = 6;
+const ITEMS_PER_CLICK = 3;
+const MOBILE_INITIAL_VISIBLE_ITEMS = 3;
+const DESKTOP_INITIAL_VISIBLE_ITEMS = 6;
 const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
+const PORTFOLIO_SECTION_ID = "projects";
 
 const tabs = [
   {
@@ -41,20 +43,162 @@ function isVectorImage(imageUrl) {
   return /\.svg(?:\?.*)?$/i.test(imageUrl);
 }
 
-function useResetExpansionOnBreakpointChange(resetExpansion) {
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 767px)");
+function getHeaderOffset() {
+  const header = document.querySelector("header");
 
-    function handleChange() {
-      resetExpansion();
+  if (!header) {
+    return 16;
+  }
+
+  const headerStyles = window.getComputedStyle(header);
+  const isFixedHeader =
+    headerStyles.position === "fixed" || headerStyles.position === "sticky";
+
+  if (!isFixedHeader) {
+    return 16;
+  }
+
+  return header.getBoundingClientRect().height + 16;
+}
+
+function easeInOutCubic(progress) {
+  return progress < 0.5
+    ? 4 * progress * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+}
+
+function smoothScrollToPortfolioShowcase() {
+  return new Promise((resolve) => {
+    const targetElement = document.getElementById(PORTFOLIO_SECTION_ID);
+
+    if (!targetElement) {
+      resolve();
+      return;
     }
 
-    mediaQuery.addEventListener("change", handleChange);
+    const documentElement = document.documentElement;
+    const previousInlineScrollBehavior = documentElement.style.scrollBehavior;
 
-    return () => {
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, [resetExpansion]);
+    documentElement.style.scrollBehavior = "auto";
+
+    const startPosition = window.scrollY;
+    const headerOffset = getHeaderOffset();
+    const targetPosition = Math.max(
+      0,
+      startPosition + targetElement.getBoundingClientRect().top - headerOffset,
+    );
+    const distance = targetPosition - startPosition;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (prefersReducedMotion || Math.abs(distance) < 2) {
+      window.scrollTo(0, targetPosition);
+      documentElement.style.scrollBehavior = previousInlineScrollBehavior;
+      resolve();
+      return;
+    }
+
+    const duration = Math.min(1200, Math.max(700, Math.abs(distance) * 0.3));
+    let startTime = null;
+
+    function animateScroll(currentTime) {
+      if (startTime === null) {
+        startTime = currentTime;
+      }
+
+      const elapsedTime = currentTime - startTime;
+      const progress = Math.min(elapsedTime / duration, 1);
+      const easedProgress = easeInOutCubic(progress);
+
+      window.scrollTo(0, startPosition + distance * easedProgress);
+
+      if (progress < 1) {
+        window.requestAnimationFrame(animateScroll);
+        return;
+      }
+
+      window.scrollTo(0, targetPosition);
+      documentElement.style.scrollBehavior = previousInlineScrollBehavior;
+      resolve();
+    }
+
+    window.requestAnimationFrame(animateScroll);
+  });
+}
+
+function getResponsiveVisibilityClass(
+  index,
+  mobileVisibleCount,
+  desktopVisibleCount,
+) {
+  const visibleOnMobile = index < mobileVisibleCount;
+  const visibleOnDesktop = index < desktopVisibleCount;
+
+  if (!visibleOnMobile && !visibleOnDesktop) {
+    return "hidden";
+  }
+
+  if (!visibleOnMobile && visibleOnDesktop) {
+    return "hidden md:block";
+  }
+
+  if (visibleOnMobile && !visibleOnDesktop) {
+    return "md:hidden";
+  }
+
+  return undefined;
+}
+
+function useIncrementalVisibility(totalItems) {
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(
+    MOBILE_INITIAL_VISIBLE_ITEMS,
+  );
+  const [desktopVisibleCount, setDesktopVisibleCount] = useState(
+    DESKTOP_INITIAL_VISIBLE_ITEMS,
+  );
+  const isAnimatingRef = useRef(false);
+
+  const effectiveMobileVisibleCount = Math.min(mobileVisibleCount, totalItems);
+
+  const effectiveDesktopVisibleCount = Math.min(
+    desktopVisibleCount,
+    totalItems,
+  );
+
+  const showMoreMobile = useCallback(() => {
+    setMobileVisibleCount((currentCount) =>
+      Math.min(currentCount + ITEMS_PER_CLICK, totalItems),
+    );
+  }, [totalItems]);
+
+  const showMoreDesktop = useCallback(() => {
+    setDesktopVisibleCount((currentCount) =>
+      Math.min(currentCount + ITEMS_PER_CLICK, totalItems),
+    );
+  }, [totalItems]);
+
+  const showLess = useCallback(async () => {
+    if (isAnimatingRef.current) {
+      return;
+    }
+
+    isAnimatingRef.current = true;
+
+    await smoothScrollToPortfolioShowcase();
+
+    setMobileVisibleCount(MOBILE_INITIAL_VISIBLE_ITEMS);
+    setDesktopVisibleCount(DESKTOP_INITIAL_VISIBLE_ITEMS);
+    isAnimatingRef.current = false;
+  }, []);
+
+  return {
+    mobileVisibleCount: effectiveMobileVisibleCount,
+    desktopVisibleCount: effectiveDesktopVisibleCount,
+    showMoreMobile,
+    showMoreDesktop,
+    showLess,
+  };
 }
 
 const TechStackGrid = memo(function TechStackGrid() {
@@ -88,63 +232,93 @@ const TechStackGrid = memo(function TechStackGrid() {
   );
 });
 
-function SeeMoreButton({
-  isExpanded,
-  mobileHiddenCount,
-  desktopHiddenCount,
-  onClick,
-  expandedLabel = "Show Less",
-}) {
-  const Icon = isExpanded ? ChevronUp : ChevronDown;
-  const showOnMobile = mobileHiddenCount > 0;
-  const showOnDesktop = desktopHiddenCount > 0;
+function PaginationButton({ label, icon: Icon, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="see-more-button group relative inline-flex min-h-[52px] w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-violet-300/25 bg-white/[0.06] px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-blue-950/20 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-violet-200/45 hover:bg-violet-500/14 hover:shadow-violet-500/20 sm:min-h-14 sm:w-auto sm:px-7 sm:text-sm sm:tracking-[0.18em]"
+    >
+      <span className="see-more-button-glow" />
 
-  if (!showOnMobile && !showOnDesktop) {
+      <span className="relative z-10">{label}</span>
+
+      <span className="relative z-10 flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-violet-100 transition duration-300 group-hover:scale-110 group-hover:bg-violet-500/20 sm:size-9">
+        <Icon className="size-4 transition duration-300 group-hover:translate-y-0.5" />
+      </span>
+    </button>
+  );
+}
+
+function DevicePaginationControls({
+  visibleCount,
+  initialVisibleCount,
+  totalCount,
+  onShowMore,
+  onShowLess,
+  visibilityClass,
+}) {
+  const hiddenCount = Math.max(totalCount - visibleCount, 0);
+  const nextVisibleCount = Math.min(ITEMS_PER_CLICK, hiddenCount);
+  const canShowMore = hiddenCount > 0;
+  const canShowLess = visibleCount > Math.min(initialVisibleCount, totalCount);
+
+  if (!canShowMore && !canShowLess) {
     return null;
   }
 
-  const visibilityClass =
-    showOnMobile && showOnDesktop
-      ? "flex"
-      : showOnMobile
-        ? "flex md:hidden"
-        : "hidden md:flex";
-
   return (
-    <div className={`mt-8 justify-center sm:mt-10 ${visibilityClass}`}>
-      <button
-        type="button"
-        onClick={onClick}
-        aria-expanded={isExpanded}
-        className="see-more-button group relative inline-flex min-h-[52px] w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-violet-300/25 bg-white/[0.06] px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-blue-950/20 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-violet-200/45 hover:bg-violet-500/14 hover:shadow-violet-500/20 sm:min-h-14 sm:w-auto sm:px-7 sm:text-sm sm:tracking-[0.18em]"
-      >
-        <span className="see-more-button-glow" />
+    <div
+      className={`mt-8 flex-col items-center justify-center gap-3 sm:mt-10 sm:flex-row ${visibilityClass}`}
+    >
+      {canShowMore && (
+        <PaginationButton
+          label={`See More ${nextVisibleCount}`}
+          icon={ChevronDown}
+          onClick={onShowMore}
+        />
+      )}
 
-        <span className="relative z-10">
-          {isExpanded ? (
-            expandedLabel
-          ) : (
-            <>
-              {showOnMobile && (
-                <span className={showOnDesktop ? "md:hidden" : undefined}>
-                  See More {mobileHiddenCount}
-                </span>
-              )}
-
-              {showOnDesktop && (
-                <span className={showOnMobile ? "hidden md:inline" : undefined}>
-                  See More {desktopHiddenCount}
-                </span>
-              )}
-            </>
-          )}
-        </span>
-
-        <span className="relative z-10 flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-violet-100 transition duration-300 group-hover:scale-110 group-hover:bg-violet-500/20 sm:size-9">
-          <Icon className="size-4 transition duration-300 group-hover:translate-y-0.5" />
-        </span>
-      </button>
+      {canShowLess && (
+        <PaginationButton
+          label="Show Less"
+          icon={ChevronUp}
+          onClick={onShowLess}
+        />
+      )}
     </div>
+  );
+}
+
+function PaginationControls({
+  mobileVisibleCount,
+  desktopVisibleCount,
+  totalCount,
+  onShowMoreMobile,
+  onShowMoreDesktop,
+  onShowLess,
+}) {
+  return (
+    <>
+      <DevicePaginationControls
+        visibleCount={mobileVisibleCount}
+        initialVisibleCount={MOBILE_INITIAL_VISIBLE_ITEMS}
+        totalCount={totalCount}
+        onShowMore={onShowMoreMobile}
+        onShowLess={onShowLess}
+        visibilityClass="flex md:hidden"
+      />
+
+      <DevicePaginationControls
+        visibleCount={desktopVisibleCount}
+        initialVisibleCount={DESKTOP_INITIAL_VISIBLE_ITEMS}
+        totalCount={totalCount}
+        onShowMore={onShowMoreDesktop}
+        onShowLess={onShowLess}
+        visibilityClass="hidden md:flex"
+      />
+    </>
   );
 }
 
@@ -153,33 +327,22 @@ const ProjectsPanel = memo(function ProjectsPanel({ projects }) {
     return Array.isArray(projects) ? projects : [];
   }, [projects]);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const resetExpansion = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
-
-  useResetExpansionOnBreakpointChange(resetExpansion);
+  const {
+    mobileVisibleCount,
+    desktopVisibleCount,
+    showMoreMobile,
+    showMoreDesktop,
+    showLess,
+  } = useIncrementalVisibility(projectItems.length);
 
   const visibleProjects = useMemo(() => {
-    return isExpanded
-      ? projectItems
-      : projectItems.slice(0, DESKTOP_VISIBLE_ITEMS_LIMIT);
-  }, [isExpanded, projectItems]);
+    const maximumVisibleCount = Math.max(
+      mobileVisibleCount,
+      desktopVisibleCount,
+    );
 
-  const mobileHiddenCount = Math.max(
-    projectItems.length - MOBILE_VISIBLE_ITEMS_LIMIT,
-    0,
-  );
-
-  const desktopHiddenCount = Math.max(
-    projectItems.length - DESKTOP_VISIBLE_ITEMS_LIMIT,
-    0,
-  );
-
-  const toggleExpansion = useCallback(() => {
-    setIsExpanded((current) => !current);
-  }, []);
+    return projectItems.slice(0, maximumVisibleCount);
+  }, [desktopVisibleCount, mobileVisibleCount, projectItems]);
 
   if (!projectItems.length) {
     return (
@@ -196,23 +359,24 @@ const ProjectsPanel = memo(function ProjectsPanel({ projects }) {
           <RevealOnScroll
             key={project.id ?? project.title}
             delay={index * 70}
-            className={
-              !isExpanded && index >= MOBILE_VISIBLE_ITEMS_LIMIT
-                ? "hidden md:block"
-                : undefined
-            }
+            className={getResponsiveVisibilityClass(
+              index,
+              mobileVisibleCount,
+              desktopVisibleCount,
+            )}
           >
             <ProjectCard project={project} />
           </RevealOnScroll>
         ))}
       </div>
 
-      <SeeMoreButton
-        isExpanded={isExpanded}
-        mobileHiddenCount={mobileHiddenCount}
-        desktopHiddenCount={desktopHiddenCount}
-        onClick={toggleExpansion}
-        expandedLabel="Show Less"
+      <PaginationControls
+        mobileVisibleCount={mobileVisibleCount}
+        desktopVisibleCount={desktopVisibleCount}
+        totalCount={projectItems.length}
+        onShowMoreMobile={showMoreMobile}
+        onShowMoreDesktop={showMoreDesktop}
+        onShowLess={showLess}
       />
     </div>
   );
@@ -223,33 +387,22 @@ const CertificatesPanel = memo(function CertificatesPanel({ certificates }) {
     return Array.isArray(certificates) ? certificates : [];
   }, [certificates]);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const resetExpansion = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
-
-  useResetExpansionOnBreakpointChange(resetExpansion);
+  const {
+    mobileVisibleCount,
+    desktopVisibleCount,
+    showMoreMobile,
+    showMoreDesktop,
+    showLess,
+  } = useIncrementalVisibility(certificateItems.length);
 
   const visibleCertificates = useMemo(() => {
-    return isExpanded
-      ? certificateItems
-      : certificateItems.slice(0, DESKTOP_VISIBLE_ITEMS_LIMIT);
-  }, [certificateItems, isExpanded]);
+    const maximumVisibleCount = Math.max(
+      mobileVisibleCount,
+      desktopVisibleCount,
+    );
 
-  const mobileHiddenCount = Math.max(
-    certificateItems.length - MOBILE_VISIBLE_ITEMS_LIMIT,
-    0,
-  );
-
-  const desktopHiddenCount = Math.max(
-    certificateItems.length - DESKTOP_VISIBLE_ITEMS_LIMIT,
-    0,
-  );
-
-  const toggleExpansion = useCallback(() => {
-    setIsExpanded((current) => !current);
-  }, []);
+    return certificateItems.slice(0, maximumVisibleCount);
+  }, [certificateItems, desktopVisibleCount, mobileVisibleCount]);
 
   if (!certificateItems.length) {
     return (
@@ -266,23 +419,24 @@ const CertificatesPanel = memo(function CertificatesPanel({ certificates }) {
           <RevealOnScroll
             key={certificate.id ?? certificate.title ?? certificate.img}
             delay={index * 70}
-            className={
-              !isExpanded && index >= MOBILE_VISIBLE_ITEMS_LIMIT
-                ? "hidden md:block"
-                : undefined
-            }
+            className={getResponsiveVisibilityClass(
+              index,
+              mobileVisibleCount,
+              desktopVisibleCount,
+            )}
           >
             <CertificateCard certificate={certificate} />
           </RevealOnScroll>
         ))}
       </div>
 
-      <SeeMoreButton
-        isExpanded={isExpanded}
-        mobileHiddenCount={mobileHiddenCount}
-        desktopHiddenCount={desktopHiddenCount}
-        onClick={toggleExpansion}
-        expandedLabel="Show Less"
+      <PaginationControls
+        mobileVisibleCount={mobileVisibleCount}
+        desktopVisibleCount={desktopVisibleCount}
+        totalCount={certificateItems.length}
+        onShowMoreMobile={showMoreMobile}
+        onShowMoreDesktop={showMoreDesktop}
+        onShowLess={showLess}
       />
     </div>
   );
@@ -309,7 +463,10 @@ export function PortfolioShowcaseSection({ projects = [], certificates = [] }) {
   );
 
   return (
-    <section id="projects" className="border-t border-white/10 py-20 md:py-24">
+    <section
+      id={PORTFOLIO_SECTION_ID}
+      className="border-t border-white/10 py-20 md:py-24"
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
         <RevealOnScroll className="mx-auto max-w-4xl text-center">
           <h2 className="text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
