@@ -1,21 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronUp } from "lucide-react";
 
 export function BackToTop() {
   const [isVisible, setIsVisible] = useState(false);
+  const isVisibleRef = useRef(false);
+  const animationFrameRef = useRef(null);
 
   useEffect(() => {
-    function handleScroll() {
-      setIsVisible(window.scrollY > 600);
-    }
+    const updateVisibility = () => {
+      animationFrameRef.current = null;
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll);
+      const nextIsVisible = window.scrollY > 600;
+
+      if (isVisibleRef.current === nextIsVisible) {
+        return;
+      }
+
+      isVisibleRef.current = nextIsVisible;
+      setIsVisible(nextIsVisible);
+    };
+
+    const handleScroll = () => {
+      if (animationFrameRef.current !== null) {
+        return;
+      }
+
+      animationFrameRef.current =
+        window.requestAnimationFrame(updateVisibility);
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+
+      if (animationFrameRef.current !== null) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, []);
 

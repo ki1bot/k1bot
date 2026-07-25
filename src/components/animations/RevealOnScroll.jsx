@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ const OBSERVER_OPTIONS = {
   rootMargin: "0px 0px -40px 0px",
 };
 
+const REVEAL_TRANSITION_DURATION = 850;
 let observerPool = null;
 
 function getObserverPool() {
@@ -17,16 +18,39 @@ function getObserverPool() {
   }
 
   const callbacks = new Map();
+  const pendingEntries = new Map();
+  let animationFrameId = null;
+
+  const flushEntries = () => {
+    animationFrameId = null;
+
+    pendingEntries.forEach((entry, element) => {
+      callbacks.get(element)?.(entry);
+    });
+
+    pendingEntries.clear();
+  };
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      callbacks.get(entry.target)?.(entry);
+      pendingEntries.set(entry.target, entry);
     });
+
+    if (animationFrameId === null) {
+      animationFrameId = window.requestAnimationFrame(flushEntries);
+    }
   }, OBSERVER_OPTIONS);
 
   observerPool = {
     callbacks,
+    pendingEntries,
     observer,
+    cancelPendingFrame() {
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    },
   };
 
   return observerPool;
@@ -46,9 +70,11 @@ function observeElement(element, callback) {
 
     isActive = false;
     pool.callbacks.delete(element);
+    pool.pendingEntries.delete(element);
     pool.observer.unobserve(element);
 
     if (pool.callbacks.size === 0) {
+      pool.cancelPendingFrame();
       pool.observer.disconnect();
       observerPool = null;
     }
@@ -65,8 +91,6 @@ export function RevealOnScroll({
   as: Component = "div",
 }) {
   const elementRef = useRef(null);
-  const hasRevealedRef = useRef(false);
-  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -79,27 +103,68 @@ export function RevealOnScroll({
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    if (prefersReducedMotion) {
-      return;
-    }
+    let hasRevealed = element.classList.contains("reveal-on-scroll-visible");
+    let willChangeTimer = null;
+    let stopObserving = () => {};
 
-    if (!("IntersectionObserver" in window)) {
-      const animationFrameId = window.requestAnimationFrame(() => {
-        hasRevealedRef.current = true;
-        setIsVisible(true);
-      });
+    const clearWillChangeTimer = () => {
+      if (willChangeTimer !== null) {
+        window.clearTimeout(willChangeTimer);
+        willChangeTimer = null;
+      }
+    };
+
+    const releaseWillChange = (transitionDelay = 0) => {
+      clearWillChangeTimer();
+
+      willChangeTimer = window.setTimeout(
+        () => {
+          element.style.willChange = "auto";
+          willChangeTimer = null;
+        },
+        REVEAL_TRANSITION_DURATION + transitionDelay + 50,
+      );
+    };
+
+    const showElement = () => {
+      hasRevealed = true;
+      clearWillChangeTimer();
+      element.style.willChange = "opacity, filter, transform";
+      element.style.setProperty("--reveal-delay", `${delay}ms`);
+      element.classList.add("reveal-on-scroll-visible");
+      releaseWillChange(delay);
+    };
+
+    const hideElement = () => {
+      clearWillChangeTimer();
+      element.style.willChange = "opacity, filter, transform";
+      element.style.setProperty("--reveal-delay", "0ms");
+      element.classList.remove("reveal-on-scroll-visible");
+      releaseWillChange();
+    };
+
+    if (prefersReducedMotion) {
+      element.style.setProperty("--reveal-delay", "0ms");
+      element.style.willChange = "auto";
+      element.classList.add("reveal-on-scroll-visible");
 
       return () => {
-        window.cancelAnimationFrame(animationFrameId);
+        clearWillChangeTimer();
       };
     }
 
-    let stopObserving = () => {};
+    if (!("IntersectionObserver" in window)) {
+      const animationFrameId = window.requestAnimationFrame(showElement);
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+        clearWillChangeTimer();
+      };
+    }
 
     stopObserving = observeElement(element, (entry) => {
       if (entry.isIntersecting) {
-        hasRevealedRef.current = true;
-        setIsVisible(true);
+        showElement();
 
         if (once) {
           stopObserving();
@@ -108,13 +173,16 @@ export function RevealOnScroll({
         return;
       }
 
-      if (!once && hasRevealedRef.current) {
-        setIsVisible(false);
+      if (!once && hasRevealed) {
+        hideElement();
       }
     });
 
-    return stopObserving;
-  }, [once]);
+    return () => {
+      stopObserving();
+      clearWillChangeTimer();
+    };
+  }, [delay, once]);
 
   return (
     <Component
@@ -122,14 +190,10 @@ export function RevealOnScroll({
       style={{
         "--reveal-y": `${y}px`,
         "--reveal-scale": scale,
-        "--reveal-delay": isVisible ? `${delay}ms` : "0ms",
-        willChange: isVisible ? "auto" : "opacity, filter, transform",
+        "--reveal-delay": "0ms",
+        willChange: "auto",
       }}
-      className={cn(
-        "reveal-on-scroll",
-        isVisible && "reveal-on-scroll-visible",
-        className,
-      )}
+      className={cn("reveal-on-scroll", className)}
     >
       {children}
     </Component>
