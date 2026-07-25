@@ -233,19 +233,61 @@ const TechStackGrid = memo(function TechStackGrid() {
 });
 
 function PaginationButton({ label, icon: Icon, onClick }) {
+  const isShowLess = label === "Show Less";
+
+  const buttonAppearance = isShowLess
+    ? "border-fuchsia-300/25 bg-[linear-gradient(135deg,rgba(217,70,239,0.16),rgba(124,58,237,0.12),rgba(15,23,42,0.56))] shadow-[0_16px_36px_rgba(88,28,135,0.18)] hover:border-fuchsia-200/45 hover:shadow-[0_20px_44px_rgba(168,85,247,0.26)]"
+    : "border-cyan-300/25 bg-[linear-gradient(135deg,rgba(59,130,246,0.17),rgba(124,58,237,0.13),rgba(15,23,42,0.56))] shadow-[0_16px_36px_rgba(30,64,175,0.18)] hover:border-cyan-200/45 hover:shadow-[0_20px_44px_rgba(59,130,246,0.25)]";
+
+  const accentLineAppearance = isShowLess
+    ? "via-fuchsia-200/80"
+    : "via-cyan-200/80";
+
+  const ambientGlowAppearance = isShowLess
+    ? "bg-fuchsia-500/25 group-hover:bg-fuchsia-400/35"
+    : "bg-blue-500/25 group-hover:bg-cyan-400/35";
+
+  const iconBorderAppearance = isShowLess
+    ? "bg-gradient-to-br from-fuchsia-200/60 via-violet-300/30 to-fuchsia-500/20 text-fuchsia-100 shadow-[0_0_20px_rgba(217,70,239,0.18)]"
+    : "bg-gradient-to-br from-cyan-200/60 via-blue-300/30 to-violet-500/20 text-cyan-100 shadow-[0_0_20px_rgba(59,130,246,0.18)]";
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="see-more-button group relative inline-flex min-h-[52px] w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-violet-300/25 bg-white/[0.06] px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-blue-950/20 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-violet-200/45 hover:bg-violet-500/14 hover:shadow-violet-500/20 sm:min-h-14 sm:w-auto sm:px-7 sm:text-sm sm:tracking-[0.18em]"
+      className={`group relative inline-flex min-h-[52px] w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border px-5 py-4 text-xs font-black uppercase tracking-[0.14em] text-white backdrop-blur-xl transition duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020617] sm:min-h-14 sm:w-auto sm:px-7 sm:text-sm sm:tracking-[0.18em] ${buttonAppearance}`}
     >
-      <span className="see-more-button-glow" />
+      <span className="pointer-events-none absolute inset-[1px] rounded-[calc(1rem-1px)] border border-white/[0.06] bg-[#10142d]/55" />
 
-      <span className="relative z-10">{label}</span>
+      <span
+        className={`pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent to-transparent ${accentLineAppearance}`}
+      />
 
-      <span className="relative z-10 flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] text-violet-100 transition duration-300 group-hover:scale-110 group-hover:bg-violet-500/20 sm:size-9">
-        <Icon className="size-4 transition duration-300 group-hover:translate-y-0.5" />
+      <span
+        className={`pointer-events-none absolute -bottom-10 left-1/2 h-20 w-36 -translate-x-1/2 rounded-full blur-2xl transition duration-500 ${ambientGlowAppearance}`}
+      />
+
+      <span className="pointer-events-none absolute -left-16 top-[-70%] h-[240%] w-10 rotate-[18deg] bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:left-[115%] group-hover:opacity-100" />
+
+      <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(255,255,255,0.12),transparent_42%)] opacity-70" />
+
+      <span className="relative z-10 bg-gradient-to-r from-white via-blue-100 to-violet-100 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(255,255,255,0.12)]">
+        {label}
+      </span>
+
+      <span
+        className={`relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full p-px transition duration-300 group-hover:scale-110 sm:size-9 ${iconBorderAppearance}`}
+      >
+        <span className="flex h-full w-full items-center justify-center rounded-full border border-white/10 bg-[#171a36]/95 shadow-inner shadow-white/5">
+          <Icon
+            className={`size-4 transition duration-300 ${
+              isShowLess
+                ? "group-hover:-translate-y-0.5"
+                : "group-hover:translate-y-0.5"
+            }`}
+          />
+        </span>
       </span>
     </button>
   );
