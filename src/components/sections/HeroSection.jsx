@@ -325,7 +325,7 @@ export function HeroSection() {
         </RevealOnScroll>
 
         <RevealOnScroll
-          className="order-2 block lg:translate-x-16 xl:translate-x-20"
+          className="order-2 hidden lg:block lg:translate-x-16 xl:translate-x-20"
           delay={120}
           y={28}
           scale={0.99}
