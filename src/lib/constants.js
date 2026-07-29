@@ -442,7 +442,7 @@ export const FALLBACK_COMMENTS = [
   {
     id: "fallback-guest-comment",
     user_name: "Faris",
-    content: "Portofolionya rapi, modern, dan mudah dipahami.",
+    content: "Portofolionya rapi dan bagus banget.",
     profile_image: assetUrl("assets/default-avatar.jpg"),
     is_pinned: false,
     created_at: "2026-01-02T00:00:00.000Z",
