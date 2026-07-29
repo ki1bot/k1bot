@@ -1,9 +1,5 @@
 import { Clock3, Pin } from "lucide-react";
 
-import { assetUrl } from "@/lib/supabase-storage";
-
-const DEFAULT_AVATAR_URL = assetUrl("assets/default-avatar.jpg");
-
 function formatCommentDate(dateString) {
   if (!dateString) return "";
 
@@ -20,6 +16,7 @@ function formatCommentDate(dateString) {
 }
 
 export function CommentCard({ comment }) {
+  const initial = comment.user_name?.charAt(0)?.toUpperCase() || "?";
   const formattedDate = formatCommentDate(comment.created_at);
 
   return (
@@ -33,17 +30,21 @@ export function CommentCard({ comment }) {
 
       <div className="flex items-start gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
-          <img
-            src={DEFAULT_AVATAR_URL}
-            alt={`Avatar ${comment.user_name || "pengguna"}`}
-            width={44}
-            height={44}
-            loading="lazy"
-            decoding="async"
-            fetchPriority="low"
-            draggable={false}
-            className="h-full w-full object-cover"
-          />
+          {comment.profile_image ? (
+            <img
+              src={comment.profile_image}
+              alt={comment.user_name || "Komentar pengguna"}
+              width={44}
+              height={44}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              draggable={false}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="text-sm font-semibold text-white">{initial}</span>
+          )}
         </div>
 
         <div className="min-w-0 flex-1">
