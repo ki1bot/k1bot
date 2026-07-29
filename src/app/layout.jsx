@@ -4,7 +4,7 @@ import { LoadingScreen } from "@/components/animations/LoadingScreen";
 import { ReloadToHome } from "@/components/animations/ReloadToHome";
 import { assetUrl } from "@/lib/supabase-storage";
 
-const siteIcon = "/assets/logoKibot.png?v=2";
+const siteIcon = "/assets/logoKibot.png";
 
 export const metadata = {
   title: "Rifqi | Software Engineer",
