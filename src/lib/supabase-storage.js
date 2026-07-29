@@ -46,6 +46,12 @@ const ASSET_ALIAS_MAP = {
   "sertifikat/dicoding8.png": "/sertifikat/dicoding8.png",
   "sertifikat/dicoding9.pdf": "/sertifikat/dicoding9.pdf",
   "sertifikat/dicoding9.png": "/sertifikat/dicoding9.png",
+  "sertifikat/RevoU-DataAnalytics.pdf": "/sertifikat/RevoU-DataAnalytics.pdf",
+  "sertifikat/RevoU-DataAnalytics.png": "/sertifikat/RevoU-DataAnalytics.png",
+  "sertifikat/RevoU-SoftwareEngineering.pdf":
+    "/sertifikat/RevoU-SoftwareEngineering.pdf",
+  "sertifikat/RevoU-SoftwareEngineering.png":
+    "/sertifikat/RevoU-SoftwareEngineering.png",
   "sertifikat/SertifikatKompetensi.pdf": "/sertifikat/SertifikatKompetensi.pdf",
   "sertifikat/SertifikatKompetensi.png": "/sertifikat/SertifikatKompetensi.png",
   "sertifikat/sertifikatlsp-semester1.pdf":
