@@ -436,7 +436,7 @@ export const FALLBACK_COMMENTS = [
     content: "Halo, terima kasih sudah mampir ke portofolio saya.",
     profile_image: assetUrl("assets/rifqi.jpg"),
     is_pinned: true,
-    created_at: "2026-02-24T00:00:00.000+07:00",
+    created_at: "2026-01-01T00:00:00.000Z",
   },
   {
     id: "fallback-guest-comment",
@@ -444,6 +444,6 @@ export const FALLBACK_COMMENTS = [
     content: "Portofolionya rapi dan bagus banget.",
     profile_image: assetUrl("screen/default-avatar.jpg"),
     is_pinned: false,
-    created_at: "2026-03-13T00:00:00.000+07:00",
+    created_at: "2026-01-01T00:00:00.000Z",
   },
 ];
