@@ -15,7 +15,6 @@ export const PERSONAL_INFO = {
   youtube: "https://www.youtube.com/@kibot7659",
   tiktok: "https://www.tiktok.com/@kiibott_?_r=1&_t=ZS-96Aalc9CrbQ",
 
-  // profileImage: assetUrl("assets/rifqi.jpg"),
   profileImage: assetUrl("assets/Rifqii.png"),
   description:
     "Saya membangun website modern, responsif, dan terstruktur menggunakan React, Next.js, Tailwind CSS, Shadcn, dan Supabase.",
@@ -435,16 +434,16 @@ export const FALLBACK_COMMENTS = [
     id: "fallback-pinned-comment",
     user_name: "Rifqi",
     content: "Halo, terima kasih sudah mampir ke portofolio saya.",
-    profile_image: assetUrl("assets/default-avatar.jpg"),
+    profile_image: assetUrl("assets/rifqi.jpg"),
     is_pinned: true,
-    created_at: "2026-01-01T00:00:00.000Z",
+    created_at: "2026-02-24T00:00:00.000+07:00",
   },
   {
     id: "fallback-guest-comment",
     user_name: "Faris",
     content: "Portofolionya rapi dan bagus banget.",
-    profile_image: assetUrl("assets/default-avatar.jpg"),
+    profile_image: assetUrl("screen/default-avatar.jpg"),
     is_pinned: false,
-    created_at: "2026-01-02T00:00:00.000Z",
+    created_at: "2026-03-13T00:00:00.000+07:00",
   },
 ];

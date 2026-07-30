@@ -38,7 +38,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/assets/techstack/:path*",
+        source: "/img/:path*",
         headers: [
           {
             key: "Cache-Control",

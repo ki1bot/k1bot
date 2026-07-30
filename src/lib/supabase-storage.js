@@ -4,13 +4,7 @@ const R2_ASSET_BASE_URL = String(
   .trim()
   .replace(/\/+$/, "");
 
-const R2_DIRECTORIES = new Set([
-  "assets",
-  "media",
-  "projects",
-  "screen",
-  "sertifikat",
-]);
+const R2_DIRECTORIES = new Set(["assets", "projects", "sertifikat"]);
 
 function cleanAssetPath(value) {
   return String(value || "").trim();
@@ -70,8 +64,24 @@ function normalizeAssetKey(value) {
     return "";
   }
 
-  if (cleanPath.startsWith("portofolio-assets/")) {
-    cleanPath = cleanPath.replace("portofolio-assets/", "");
+  const rootAliases = [
+    ["public/img/", ""],
+    ["img/", ""],
+    ["portofolio-assets/", ""],
+    ["public/assets/sertifikat/", "sertifikat/"],
+    ["public/assets/media/", "media/"],
+    ["public/assets/projects/", "projects/"],
+    ["public/assets/screen/", "screen/"],
+    ["public/assets/techstack/", "techstack/"],
+    ["public/assets/", "assets/"],
+    ["public/sertifikat/", "sertifikat/"],
+  ];
+
+  for (const [sourcePrefix, targetPrefix] of rootAliases) {
+    if (cleanPath.startsWith(sourcePrefix)) {
+      cleanPath = `${targetPrefix}${cleanPath.slice(sourcePrefix.length)}`;
+      break;
+    }
   }
 
   const pathAliases = [
@@ -84,7 +94,7 @@ function normalizeAssetKey(value) {
 
   for (const [sourcePrefix, targetPrefix] of pathAliases) {
     if (cleanPath.startsWith(sourcePrefix)) {
-      return cleanPath.replace(sourcePrefix, targetPrefix);
+      return `${targetPrefix}${cleanPath.slice(sourcePrefix.length)}`;
     }
   }
 
@@ -96,23 +106,7 @@ function getAssetDirectory(path) {
 }
 
 function buildLocalAssetUrl(path) {
-  if (path.startsWith("techstack/")) {
-    return `/assets/${path}`;
-  }
-
-  if (
-    path.startsWith("media/") ||
-    path.startsWith("projects/") ||
-    path.startsWith("screen/")
-  ) {
-    return `/assets/${path}`;
-  }
-
-  if (path.startsWith("assets/") || path.startsWith("sertifikat/")) {
-    return `/${path}`;
-  }
-
-  return `/${path}`;
+  return `/img/${path}`;
 }
 
 function buildR2AssetUrl(path) {
@@ -152,10 +146,6 @@ export function assetUrl(path) {
   }
 
   const directory = getAssetDirectory(normalizedPath);
-
-  if (directory === "techstack") {
-    return `${buildLocalAssetUrl(normalizedPath)}${suffix}`;
-  }
 
   if (R2_DIRECTORIES.has(directory)) {
     const r2Url = buildR2AssetUrl(normalizedPath);
