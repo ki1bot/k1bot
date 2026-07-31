@@ -1,49 +1,37 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const navItems = [
   {
     id: "home",
     label: "Home",
-    href: "/",
+    href: "#home",
   },
   {
     id: "about",
     label: "About",
-    href: "/about",
+    href: "#about",
   },
   {
     id: "projects",
     label: "Portofolio",
-    href: "/projects",
+    href: "#projects",
   },
   {
     id: "contact",
     label: "Contact",
-    href: "/contact",
+    href: "#contact",
   },
 ];
 
-const pathToSection = {
-  "/": "home",
-  "/home": "home",
-  "/about": "about",
-  "/projects": "projects",
-  "/contact": "contact",
-};
+function getSectionFromHash(hash) {
+  const sectionId = String(hash || "").replace(/^#/, "");
 
-const sectionToPath = {
-  home: "/",
-  about: "/about",
-  projects: "/projects",
-  contact: "/contact",
-};
+  const sectionExists = navItems.some((item) => item.id === sectionId);
 
-function getSectionFromPathname(pathname) {
-  return pathToSection[pathname] || "home";
+  return sectionExists ? sectionId : "home";
 }
 
 export function Navbar() {
@@ -67,38 +55,28 @@ export function Navbar() {
 
   const displayedSection = hoveredSection || activeSection;
 
-  function updateBrowserPath(sectionId, mode = "replace") {
-    if (typeof window === "undefined") return;
+  const updateIndicator = useCallback(
+    (sectionId = activeSectionRef.current) => {
+      const navContainer = desktopNavRef.current;
+      const activeElement = itemRefs.current[sectionId];
 
-    const nextPath = sectionToPath[sectionId] || "/";
+      if (!navContainer || !activeElement) {
+        return;
+      }
 
-    if (window.location.pathname === nextPath) return;
+      const navRect = navContainer.getBoundingClientRect();
+      const activeRect = activeElement.getBoundingClientRect();
 
-    if (mode === "push") {
-      window.history.pushState(null, "", nextPath);
-      return;
-    }
+      setIndicatorStyle({
+        width: activeRect.width,
+        left: activeRect.left - navRect.left,
+        opacity: 1,
+      });
+    },
+    [],
+  );
 
-    window.history.replaceState(null, "", nextPath);
-  }
-
-  function updateIndicator(sectionId = activeSectionRef.current) {
-    const navContainer = desktopNavRef.current;
-    const activeElement = itemRefs.current[sectionId];
-
-    if (!navContainer || !activeElement) return;
-
-    const navRect = navContainer.getBoundingClientRect();
-    const activeRect = activeElement.getBoundingClientRect();
-
-    setIndicatorStyle({
-      width: activeRect.width,
-      left: activeRect.left - navRect.left,
-      opacity: 1,
-    });
-  }
-
-  function getCurrentSection() {
+  const getCurrentSection = useCallback(() => {
     if (typeof document === "undefined" || typeof window === "undefined") {
       return "home";
     }
@@ -107,7 +85,9 @@ export function Navbar() {
       .map((item) => {
         const section = document.getElementById(item.id);
 
-        if (!section) return null;
+        if (!section) {
+          return null;
+        }
 
         const rect = section.getBoundingClientRect();
 
@@ -119,44 +99,53 @@ export function Navbar() {
       })
       .filter(Boolean)
       .filter((section) => section.visible)
-      .sort((a, b) => a.distance - b.distance)[0];
+      .sort((firstSection, secondSection) => {
+        return firstSection.distance - secondSection.distance;
+      })[0];
 
     return currentSection?.id || "home";
-  }
+  }, []);
 
-  function detectActiveSection() {
-    if (typeof window === "undefined") return;
+  const detectActiveSection = useCallback(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
 
     setIsScrolled(window.scrollY > 16);
 
-    if (manualScrollRef.current) return;
+    if (manualScrollRef.current) {
+      return;
+    }
 
     const currentSection = getCurrentSection();
 
-    if (activeSectionRef.current === currentSection) return;
+    if (activeSectionRef.current === currentSection) {
+      return;
+    }
 
     activeSectionRef.current = currentSection;
     setActiveSection(currentSection);
 
-    requestAnimationFrame(() => {
-      updateBrowserPath(currentSection, "replace");
-
+    window.requestAnimationFrame(() => {
       if (!hoveredSectionRef.current) {
         updateIndicator(currentSection);
       }
     });
-  }
+  }, [getCurrentSection, updateIndicator]);
 
-  function scrollToSection(sectionId, behavior = "smooth") {
+  const scrollToSection = useCallback((sectionId, behavior = "smooth") => {
     if (typeof document === "undefined" || typeof window === "undefined") {
       return;
     }
 
     const section = document.getElementById(sectionId);
 
-    if (!section) return;
+    if (!section) {
+      return;
+    }
 
     const navbarOffset = window.innerWidth < 768 ? 84 : 115;
+
     const rawPosition =
       section.getBoundingClientRect().top + window.scrollY - navbarOffset;
 
@@ -166,13 +155,13 @@ export function Navbar() {
       top: sectionPosition,
       behavior,
     });
-  }
+  }, []);
 
   function handleDesktopMouseEnter(sectionId) {
     hoveredSectionRef.current = sectionId;
     setHoveredSection(sectionId);
 
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
       updateIndicator(sectionId);
     });
   }
@@ -181,29 +170,28 @@ export function Navbar() {
     hoveredSectionRef.current = null;
     setHoveredSection(null);
 
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
       updateIndicator(activeSectionRef.current);
     });
   }
 
   useEffect(() => {
-    const initialFrame = requestAnimationFrame(() => {
-      const sectionFromPath = getSectionFromPathname(window.location.pathname);
+    const initialFrame = window.requestAnimationFrame(() => {
+      const sectionFromHash = getSectionFromHash(window.location.hash);
 
-      activeSectionRef.current = sectionFromPath;
-      setActiveSection(sectionFromPath);
+      activeSectionRef.current = sectionFromHash;
+      setActiveSection(sectionFromHash);
       setIsScrolled(window.scrollY > 16);
+      updateIndicator(sectionFromHash);
 
-      updateIndicator(sectionFromPath);
-
-      if (sectionFromPath !== "home") {
-        scrollToSection(sectionFromPath, "auto");
+      if (window.location.hash && sectionFromHash !== "home") {
+        scrollToSection(sectionFromHash, "auto");
       }
     });
 
-    function handlePopState() {
-      requestAnimationFrame(() => {
-        const nextSection = getSectionFromPathname(window.location.pathname);
+    function handleHashChange() {
+      window.requestAnimationFrame(() => {
+        const nextSection = getSectionFromHash(window.location.hash);
 
         activeSectionRef.current = nextSection;
         setActiveSection(nextSection);
@@ -212,27 +200,33 @@ export function Navbar() {
       });
     }
 
-    window.addEventListener("popstate", handlePopState);
+    window.addEventListener("hashchange", handleHashChange);
 
     return () => {
-      cancelAnimationFrame(initialFrame);
-      window.removeEventListener("popstate", handlePopState);
+      window.cancelAnimationFrame(initialFrame);
+      window.removeEventListener("hashchange", handleHashChange);
     };
-  }, []);
+  }, [scrollToSection, updateIndicator]);
 
   useEffect(() => {
     activeSectionRef.current = activeSection;
 
-    requestAnimationFrame(() => {
+    const indicatorFrame = window.requestAnimationFrame(() => {
       updateIndicator(hoveredSectionRef.current || activeSection);
     });
 
+    return () => {
+      window.cancelAnimationFrame(indicatorFrame);
+    };
+  }, [activeSection, updateIndicator]);
+
+  useEffect(() => {
     function handleResize() {
       if (window.innerWidth >= 1024) {
         setIsOpen(false);
       }
 
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         updateIndicator(hoveredSectionRef.current || activeSectionRef.current);
       });
     }
@@ -242,18 +236,20 @@ export function Navbar() {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [activeSection]);
+  }, [updateIndicator]);
 
   useEffect(() => {
     function handleScroll() {
       if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+        window.cancelAnimationFrame(animationFrameRef.current);
       }
 
-      animationFrameRef.current = requestAnimationFrame(detectActiveSection);
+      animationFrameRef.current =
+        window.requestAnimationFrame(detectActiveSection);
     }
 
-    animationFrameRef.current = requestAnimationFrame(detectActiveSection);
+    animationFrameRef.current =
+      window.requestAnimationFrame(detectActiveSection);
 
     window.addEventListener("scroll", handleScroll, {
       passive: true,
@@ -263,17 +259,19 @@ export function Navbar() {
       window.removeEventListener("scroll", handleScroll);
 
       if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+        window.cancelAnimationFrame(animationFrameRef.current);
       }
 
       if (manualScrollTimeoutRef.current) {
-        clearTimeout(manualScrollTimeoutRef.current);
+        window.clearTimeout(manualScrollTimeoutRef.current);
       }
     };
-  }, []);
+  }, [detectActiveSection]);
 
   useEffect(() => {
-    if (typeof document === "undefined") return;
+    if (typeof document === "undefined") {
+      return;
+    }
 
     document.body.style.overflow = isOpen ? "hidden" : "";
 
@@ -298,31 +296,32 @@ export function Navbar() {
 
     const section = document.getElementById(sectionId);
 
-    if (!section) return;
+    if (!section) {
+      return;
+    }
 
     manualScrollRef.current = true;
     activeSectionRef.current = sectionId;
     hoveredSectionRef.current = null;
 
     if (manualScrollTimeoutRef.current) {
-      clearTimeout(manualScrollTimeoutRef.current);
+      window.clearTimeout(manualScrollTimeoutRef.current);
     }
 
     setActiveSection(sectionId);
     setHoveredSection(null);
     setIsOpen(false);
 
-    requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
       updateIndicator(sectionId);
-      updateBrowserPath(sectionId, "push");
     });
 
     scrollToSection(sectionId, "smooth");
 
-    manualScrollTimeoutRef.current = setTimeout(() => {
+    manualScrollTimeoutRef.current = window.setTimeout(() => {
       manualScrollRef.current = false;
 
-      requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
         detectActiveSection();
       });
     }, 950);
@@ -341,14 +340,15 @@ export function Navbar() {
           isScrolled || isOpen ? "py-3.5 md:py-5" : "py-5 md:py-8"
         }`}
       >
-        <Link
-          href="/"
+        <a
+          href="#home"
           onClick={(event) => handleNavClick(event, "home")}
           className="group relative inline-flex items-center overflow-hidden rounded-full px-3 py-1.5 text-2xl font-black tracking-wide text-violet-300 transition-all duration-300 hover:-translate-y-0.5 hover:text-white hover:drop-shadow-[0_0_14px_rgba(168,85,247,0.45)] sm:px-5 sm:py-2 sm:text-[1.7rem]"
         >
           <span className="absolute inset-0 rounded-full bg-white/[0.05] opacity-0 transition duration-300 group-hover:opacity-100" />
+
           <span className="relative z-10">Rifqi</span>
-        </Link>
+        </a>
 
         <div
           ref={desktopNavRef}

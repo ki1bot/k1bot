@@ -91,7 +91,7 @@ export function RevealOnScroll({
   delay = 0,
   y = 32,
   scale = 0.985,
-  once = true,
+  once = false,
   as: Component = "div",
 }) {
   const elementRef = useRef(null);
