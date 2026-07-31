@@ -7,7 +7,7 @@ const RELOAD_TO_HOME_HAS_RUN_KEY = "__portfolio_reload_to_home_has_run__";
 const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
 
 const PROJECT_RETURN_MAX_AGE = 10 * 60 * 1000;
-const PORTFOLIO_SECTION_HASH = "#projects";
+const PORTFOLIO_SECTION_HASH = "/";
 
 const MOBILE_RELOAD_SCROLL_DELAYS_MS = [0, 50, 150, 350, 700, 1100, 1500];
 
