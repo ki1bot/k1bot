@@ -1,0 +1,71 @@
+.portfolio-loader {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.portfolio-loader-exit {
+  pointer-events: none;
+  filter: none !important;
+  will-change: opacity, transform;
+  animation: portfolioLoaderExitStable 700ms cubic-bezier(0.65, 0, 0.35, 1)
+    forwards;
+}
+
+#home .reveal-on-scroll {
+  filter: none;
+  transition:
+    opacity 700ms ease,
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#home .reveal-on-scroll-visible {
+  filter: none;
+}
+
+@keyframes portfolioLoaderExitStable {
+  0% {
+    opacity: 1;
+    visibility: visible;
+    transform: translateZ(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateZ(0) scale(1.015);
+  }
+}
+
+@media (max-width: 767px) {
+  .portfolio-loader-content {
+    animation-duration: 500ms;
+  }
+
+  .portfolio-loader-icon {
+    animation:
+      portfolioIconReveal 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards,
+      portfolioIconFloat 2.4s ease-in-out infinite;
+    animation-delay:
+      var(--loader-icon-mobile-delay),
+      calc(var(--loader-icon-mobile-delay) + 550ms);
+  }
+
+  .portfolio-loader-title span {
+    animation: portfolioTextReveal 500ms cubic-bezier(0.22, 1, 0.36, 1) 250ms
+      forwards;
+  }
+
+  .portfolio-loader-title strong {
+    animation:
+      portfolioTextReveal 500ms cubic-bezier(0.22, 1, 0.36, 1) 400ms forwards,
+      portfolioGradientMove 2.4s ease-in-out 900ms infinite alternate;
+  }
+
+  .portfolio-loader-progress span {
+    animation-duration: 900ms;
+  }
+
+  .portfolio-loader-exit {
+    animation-duration: 500ms;
+  }
+}

@@ -10,6 +10,7 @@ const OBSERVER_OPTIONS = {
 };
 
 const REVEAL_TRANSITION_DURATION = 850;
+
 let observerPool = null;
 
 function getObserverPool() {
@@ -19,6 +20,7 @@ function getObserverPool() {
 
   const callbacks = new Map();
   const pendingEntries = new Map();
+
   let animationFrameId = null;
 
   const flushEntries = () => {
@@ -58,6 +60,7 @@ function getObserverPool() {
 
 function observeElement(element, callback) {
   const pool = getObserverPool();
+
   let isActive = true;
 
   pool.callbacks.set(element, callback);
@@ -69,6 +72,7 @@ function observeElement(element, callback) {
     }
 
     isActive = false;
+
     pool.callbacks.delete(element);
     pool.pendingEntries.delete(element);
     pool.observer.unobserve(element);
@@ -87,7 +91,7 @@ export function RevealOnScroll({
   delay = 0,
   y = 32,
   scale = 0.985,
-  once = false,
+  once = true,
   as: Component = "div",
 }) {
   const elementRef = useRef(null);
@@ -104,6 +108,7 @@ export function RevealOnScroll({
     ).matches;
 
     let hasRevealed = element.classList.contains("reveal-on-scroll-visible");
+
     let willChangeTimer = null;
     let stopObserving = () => {};
 
@@ -127,19 +132,32 @@ export function RevealOnScroll({
     };
 
     const showElement = () => {
+      if (hasRevealed && once) {
+        return;
+      }
+
       hasRevealed = true;
+
       clearWillChangeTimer();
+
       element.style.willChange = "opacity, filter, transform";
       element.style.setProperty("--reveal-delay", `${delay}ms`);
       element.classList.add("reveal-on-scroll-visible");
+
       releaseWillChange(delay);
     };
 
     const hideElement = () => {
+      if (once || !hasRevealed) {
+        return;
+      }
+
       clearWillChangeTimer();
+
       element.style.willChange = "opacity, filter, transform";
       element.style.setProperty("--reveal-delay", "0ms");
       element.classList.remove("reveal-on-scroll-visible");
+
       releaseWillChange();
     };
 
@@ -173,9 +191,7 @@ export function RevealOnScroll({
         return;
       }
 
-      if (!once && hasRevealed) {
-        hideElement();
-      }
+      hideElement();
     });
 
     return () => {

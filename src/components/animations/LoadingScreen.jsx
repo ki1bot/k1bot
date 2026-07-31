@@ -1,24 +1,32 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import { assetUrl } from "@/lib/supabase-storage";
+const MOBILE_EXIT_DELAY_MS = 1200;
+const MOBILE_REMOVE_DELAY_MS = 1700;
+
+const DESKTOP_EXIT_DELAY_MS = 2300;
+const DESKTOP_REMOVE_DELAY_MS = 3000;
 
 const loadingIcons = [
   {
     label: "HTML",
-    src: assetUrl("screen/html.png"),
-    delay: "0ms",
+    src: "/img/screen/html.png",
+    desktopDelay: "0ms",
+    mobileDelay: "0ms",
   },
   {
     label: "Profile",
-    src: assetUrl("screen/profile.png"),
-    delay: "140ms",
+    src: "/img/screen/profile.png",
+    desktopDelay: "140ms",
+    mobileDelay: "90ms",
   },
   {
     label: "Github",
-    src: assetUrl("screen/github.png"),
-    delay: "280ms",
+    src: "/img/screen/github.png",
+    desktopDelay: "280ms",
+    mobileDelay: "180ms",
   },
 ];
 
@@ -27,29 +35,35 @@ export function LoadingScreen() {
   const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
-    const htmlElement = document.documentElement;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+    const exitDelay = isMobile ? MOBILE_EXIT_DELAY_MS : DESKTOP_EXIT_DELAY_MS;
+
+    const removeDelay = isMobile
+      ? MOBILE_REMOVE_DELAY_MS
+      : DESKTOP_REMOVE_DELAY_MS;
 
     document.body.classList.add("portfolio-loading-active");
 
-    const exitTimer = setTimeout(() => {
+    const exitTimer = window.setTimeout(() => {
       setIsLeaving(true);
-      htmlElement.classList.remove("portfolio-is-loading");
-    }, 2300);
+    }, exitDelay);
 
-    const removeTimer = setTimeout(() => {
+    const removeTimer = window.setTimeout(() => {
       setIsVisible(false);
       document.body.classList.remove("portfolio-loading-active");
-    }, 3000);
+    }, removeDelay);
 
     return () => {
-      clearTimeout(exitTimer);
-      clearTimeout(removeTimer);
-      htmlElement.classList.remove("portfolio-is-loading");
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(removeTimer);
       document.body.classList.remove("portfolio-loading-active");
     };
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
 
   return (
     <div
@@ -69,14 +83,20 @@ export function LoadingScreen() {
               key={icon.label}
               className="portfolio-loader-icon"
               style={{
-                "--loader-icon-delay": icon.delay,
+                "--loader-icon-delay": icon.desktopDelay,
+                "--loader-icon-mobile-delay": icon.mobileDelay,
               }}
             >
-              <img
+              <Image
                 src={icon.src}
                 alt=""
+                width={48}
+                height={48}
+                sizes="(max-width: 639px) 36px, 40px"
+                quality={75}
+                priority
                 className="portfolio-loader-image-icon"
-                draggable="false"
+                draggable={false}
               />
             </div>
           ))}
