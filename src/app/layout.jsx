@@ -1,5 +1,5 @@
-import "./globals.css";
-import "./mobile-performance.css";
+import "./css/style.css";
+import "./css/StyleMobile.css";
 
 import { LoadingScreen } from "@/components/animations/LoadingScreen";
 import { ReloadToHome } from "@/components/animations/ReloadToHome";
