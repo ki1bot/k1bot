@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
 const PROJECT_RETURN_MAX_AGE = 10 * 60 * 1000;
+const PORTFOLIO_FALLBACK_URL = "/#projects";
 
 function getValidReturnLocation() {
   try {
@@ -36,6 +37,10 @@ function getValidReturnLocation() {
       return null;
     }
 
+    if (!returnUrl.hash) {
+      returnUrl.hash = "#projects";
+    }
+
     return returnUrl;
   } catch {
     return null;
@@ -53,7 +58,14 @@ export function ProjectBackButton() {
       return;
     }
 
-    router.replace("/#projects");
+    if (returnLocation) {
+      const returnPath = `${returnLocation.pathname}${returnLocation.search}${returnLocation.hash}`;
+
+      router.replace(returnPath);
+      return;
+    }
+
+    router.replace(PORTFOLIO_FALLBACK_URL);
   }
 
   return (

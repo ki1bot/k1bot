@@ -10,9 +10,20 @@ import { Card } from "@/components/ui/card";
 import { createProjectSlug } from "@/lib/project-slug";
 
 const PROJECT_RETURN_STORAGE_KEY = "portfolio_project_return";
+const PORTFOLIO_SECTION_HASH = "#projects";
 
 function canUseNextImage(imageUrl) {
   return imageUrl.startsWith("/") && !/\.(?:gif|svg)(?:\?.*)?$/i.test(imageUrl);
+}
+
+function getPortfolioReturnLocation() {
+  const returnLocation = new URL(window.location.href);
+
+  returnLocation.pathname = "/";
+  returnLocation.search = "";
+  returnLocation.hash = PORTFOLIO_SECTION_HASH;
+
+  return returnLocation;
 }
 
 export const ProjectCard = memo(function ProjectCard({ project }) {
@@ -54,10 +65,15 @@ export const ProjectCard = memo(function ProjectCard({ project }) {
     }
 
     try {
+      const returnLocation = getPortfolioReturnLocation();
+      const returnPath = `${returnLocation.pathname}${returnLocation.search}${returnLocation.hash}`;
+
+      window.history.replaceState(window.history.state, "", returnPath);
+
       sessionStorage.setItem(
         PROJECT_RETURN_STORAGE_KEY,
         JSON.stringify({
-          url: window.location.href,
+          url: returnLocation.href,
           savedAt: Date.now(),
         }),
       );
