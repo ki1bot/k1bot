@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -19,11 +20,12 @@ function getValidReturnLocation() {
 
     const returnState = JSON.parse(storedValue);
     const savedAt = Number(returnState.savedAt);
+    const stateAge = Date.now() - savedAt;
 
     if (
       !Number.isFinite(savedAt) ||
-      Date.now() - savedAt < 0 ||
-      Date.now() - savedAt > PROJECT_RETURN_MAX_AGE
+      stateAge < 0 ||
+      stateAge > PROJECT_RETURN_MAX_AGE
     ) {
       return null;
     }
@@ -50,6 +52,14 @@ function getValidReturnLocation() {
 export function ProjectBackButton() {
   const router = useRouter();
 
+  useEffect(() => {
+    router.prefetch(PORTFOLIO_FALLBACK_URL);
+  }, [router]);
+
+  function prefetchPortfolio() {
+    router.prefetch(PORTFOLIO_FALLBACK_URL);
+  }
+
   function handleBack() {
     const returnLocation = getValidReturnLocation();
 
@@ -72,6 +82,9 @@ export function ProjectBackButton() {
     <button
       type="button"
       onClick={handleBack}
+      onPointerEnter={prefetchPortfolio}
+      onFocus={prefetchPortfolio}
+      onTouchStart={prefetchPortfolio}
       className="video-hover-button video-hover-button-dark inline-flex h-11 items-center gap-2 rounded-xl border border-white/10 px-4 text-white shadow-lg shadow-blue-950/10 sm:h-12 sm:px-5"
     >
       <ArrowLeft className="size-4" />
