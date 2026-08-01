@@ -11,11 +11,12 @@ import { assetUrl } from "@/lib/supabase-storage";
 const heroStacks = [
   "JavaScript",
   "TypeScript",
-  "Node.Js",
-  "Bootstrap",
-  "Tailwind",
   "React",
-  "Next.Js",
+  "Next.JS",
+  "Vue.JS",
+  "Node.JS",
+  "Bootstrap",
+  "Tailwind CSS",
 ];
 
 const heroRoles = ["Fullstack Website", "Mobile Application"];
@@ -266,8 +267,8 @@ export function HeroSection() {
           </div>
 
           <p className="mt-6 max-w-xl text-base leading-8 text-blue-100/75 sm:text-lg md:mt-8">
-            Menciptakan website yang inovatif, fungsional, dan user-friendly
-            untuk solusi digital.
+            Saya membangun website yang modern, fungsional, dan mudah digunakan
+            untuk menjawab berbagai kebutuhan digital.
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3 md:mt-9 md:gap-4">

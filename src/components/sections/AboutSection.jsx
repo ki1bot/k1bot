@@ -9,19 +9,19 @@ const skills = [
     icon: LayoutDashboard,
     title: "Frontend Development",
     description:
-      "Membangun tampilan website responsif, modern, dan mudah digunakan menggunakan React, Next.js, Tailwind CSS, dan Shadcn.",
+      "Mengembangkan antarmuka website yang responsif, modern, dan mudah digunakan dengan React, Next.js, Tailwind CSS, dan lain lainnya.",
   },
   {
     icon: Database,
     title: "Database Integration",
     description:
-      "Menghubungkan aplikasi dengan Supabase untuk menampilkan data project, sertifikat, komentar, dan kebutuhan website lainnya.",
+      "Mengintegrasikan aplikasi dengan database untuk menyimpan, mengelola, dan menampilkan data proyek, sertifikat, komentar, serta data pendukung lainnya.",
   },
   {
     icon: Code2,
     title: "Clean Code Structure",
     description:
-      "Menyusun struktur folder, komponen, dan kode agar mudah dibaca, dirawat, serta dikembangkan.",
+      "Menata struktur folder, komponen, dan kode secara terorganisir agar mudah dipahami, dipelihara, dan dikembangkan.",
   },
 ];
 
@@ -40,15 +40,18 @@ export function AboutSection({ projects = [], certificates = [] }) {
               </p>
 
               <h2 className="mt-5 max-w-3xl text-3xl font-black leading-[1.12] tracking-tight text-white sm:text-4xl md:mt-6 md:text-5xl lg:text-6xl">
-                Saya membangun website yang rapi, modern, dan mudah digunakan.
+                Saya membangun website dengan tampilan yang rapi, responsif, dan
+                nyaman digunakan di berbagai perangkat.
               </h2>
 
               <p className="mt-6 max-w-2xl text-base leading-8 text-blue-100/72 md:mt-8 md:text-lg">
-                Saya adalah mahasiswa Sistem Informasi yang fokus pada
-                pengembangan website modern menggunakan React, Next.js, Tailwind
-                CSS, dan Supabase. Saya menyukai tampilan yang bersih, struktur
-                kode yang terorganisir, serta pengalaman pengguna yang nyaman di
-                berbagai ukuran layar.
+                Saya adalah mahasiswa Sistem Informasi yang berfokus pada
+                pengembangan website modern. Saya menggunakan React, Next.js,
+                Tailwind CSS, dan frameword lainnya untuk membangun antarmuka
+                yang responsif, mengelola data aplikasi, serta menghadirkan
+                pengalaman pengguna yang nyaman di berbagai perangkat. Saya juga
+                memperhatikan struktur kode agar tetap rapi, mudah dipahami, dan
+                mudah dikembangkan.
               </p>
             </RevealOnScroll>
 
