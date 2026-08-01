@@ -12,7 +12,8 @@ import { PortfolioShowcaseSection } from "@/components/sections/PortfolioShowcas
 import { ExperienceSection } from "@/components/sections/ExperienceSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function HomePage() {
   const { projects, certificates, comments } = await getPortfolioData();
