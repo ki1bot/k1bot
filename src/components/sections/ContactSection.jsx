@@ -67,17 +67,21 @@ function SocialIcon({ item, className = "h-full w-full" }) {
 
 export function ContactSection({ comments = [] }) {
   const hubungiCardRef = useRef(null);
+  const hubungiHeaderRef = useRef(null);
+
   const [commentsCardHeight, setCommentsCardHeight] = useState(null);
+  const [commentsHeaderHeight, setCommentsHeaderHeight] = useState(null);
 
   useLayoutEffect(() => {
     const hubungiCard = hubungiCardRef.current;
+    const hubungiHeader = hubungiHeaderRef.current;
 
-    if (!hubungiCard) return;
+    if (!hubungiCard || !hubungiHeader) return;
 
     let animationFrameId = null;
     const timeoutIds = [];
 
-    function syncCommentsCardHeight() {
+    function syncCommentsLayout() {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
@@ -87,35 +91,50 @@ export function ContactSection({ comments = [] }) {
 
         if (!isDesktop) {
           setCommentsCardHeight(null);
+          setCommentsHeaderHeight(null);
           return;
         }
 
-        const nextHeight = Math.ceil(hubungiCard.offsetHeight);
+        const nextCardHeight = Math.ceil(hubungiCard.offsetHeight);
+        const nextHeaderHeight = Math.ceil(hubungiHeader.offsetHeight);
 
         setCommentsCardHeight((currentHeight) => {
           if (
             typeof currentHeight === "number" &&
-            Math.abs(currentHeight - nextHeight) <= 1
+            Math.abs(currentHeight - nextCardHeight) <= 1
           ) {
             return currentHeight;
           }
 
-          return nextHeight;
+          return nextCardHeight;
+        });
+
+        setCommentsHeaderHeight((currentHeight) => {
+          if (
+            typeof currentHeight === "number" &&
+            Math.abs(currentHeight - nextHeaderHeight) <= 1
+          ) {
+            return currentHeight;
+          }
+
+          return nextHeaderHeight;
         });
       });
     }
 
     function scheduleSync() {
-      syncCommentsCardHeight();
+      syncCommentsLayout();
 
       [100, 350, 700].forEach((delay) => {
-        const timeoutId = window.setTimeout(syncCommentsCardHeight, delay);
+        const timeoutId = window.setTimeout(syncCommentsLayout, delay);
         timeoutIds.push(timeoutId);
       });
     }
 
     const resizeObserver = new ResizeObserver(scheduleSync);
+
     resizeObserver.observe(hubungiCard);
+    resizeObserver.observe(hubungiHeader);
 
     const images = Array.from(hubungiCard.querySelectorAll("img"));
 
@@ -131,6 +150,7 @@ export function ContactSection({ comments = [] }) {
     }
 
     scheduleSync();
+
     window.addEventListener("resize", scheduleSync);
     window.addEventListener("load", scheduleSync);
 
@@ -164,6 +184,15 @@ export function ContactSection({ comments = [] }) {
         }
       : undefined;
 
+  const commentsHeaderLockedStyle =
+    commentsHeaderHeight !== null
+      ? {
+          height: `${commentsHeaderHeight}px`,
+          minHeight: `${commentsHeaderHeight}px`,
+          maxHeight: `${commentsHeaderHeight}px`,
+        }
+      : undefined;
+
   return (
     <section id="contact" className="border-t border-white/10 py-20 md:py-32">
       <div className="mx-auto max-w-[1320px] px-4 sm:px-6 md:px-10">
@@ -188,7 +217,10 @@ export function ContactSection({ comments = [] }) {
               ref={hubungiCardRef}
               className="rounded-[1.5rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-5 md:rounded-[1.75rem] md:p-7"
             >
-              <div className="flex items-start justify-between gap-5">
+              <div
+                ref={hubungiHeaderRef}
+                className="flex items-start justify-between gap-5"
+              >
                 <div>
                   <h3 className="text-3xl font-black tracking-tight text-white md:text-4xl">
                     Hubungi
@@ -255,27 +287,39 @@ export function ContactSection({ comments = [] }) {
               className="flex min-h-0 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-5 md:rounded-[1.75rem] md:p-7"
             >
               <div className="flex min-h-0 w-full flex-col">
-                <div className="mb-6 flex shrink-0 items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-xl bg-violet-500/12 text-violet-200">
-                    <MessageCircleMore className="size-5" />
+                <div
+                  style={commentsHeaderLockedStyle}
+                  className="shrink-0 overflow-hidden"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 text-violet-200">
+                      <MessageCircleMore className="size-5" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3 className="text-2xl font-bold text-white sm:text-[1.65rem]">
+                        Komentar{" "}
+                        <span className="text-violet-300">
+                          ({comments.length})
+                        </span>
+                      </h3>
+                    </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-xl font-bold text-white">
-                      Comments{" "}
-                      <span className="text-violet-300">
-                        ({comments.length})
-                      </span>
-                    </h3>
-                  </div>
+                  <p className="mt-4 shrink-0 text-[0.95rem] leading-7 text-blue-100/70 sm:max-w-xl sm:text-base">
+                    Tinggalkan komentar, saran, atau tanggapan mengenai
+                    portofolio ini.
+                  </p>
                 </div>
 
-                <div className="shrink-0 border-t border-white/10 pt-6">
+                <div className="mt-8 shrink-0">
                   <CommentForm />
                 </div>
 
-                <div className="mt-7 min-h-0 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-3 lg:flex-1 lg:border-0 lg:bg-transparent lg:p-0">
-                  <div className="comment-scroll-area max-h-[360px] min-h-0 space-y-4 overflow-y-auto overscroll-contain pl-1 pr-5 touch-pan-y sm:max-h-[400px] sm:pr-6 md:max-h-[440px] md:pr-6 lg:h-full lg:max-h-none lg:pr-2">
+                <div className="my-8 h-px shrink-0 bg-white/10" />
+
+                <div className="min-h-0 rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-3 lg:flex-1 lg:border-0 lg:bg-transparent lg:p-0">
+                  <div className="comment-scroll-area max-h-[360px] min-h-0 space-y-4 overflow-y-auto overscroll-contain pl-1 pr-4 touch-pan-y sm:max-h-[400px] sm:pr-5 md:max-h-[440px] md:pr-5 lg:h-full lg:max-h-none lg:pr-2">
                     {comments.length > 0 ? (
                       comments.map((comment) => (
                         <CommentCard key={comment.id} comment={comment} />

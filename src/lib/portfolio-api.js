@@ -13,6 +13,10 @@ import { createProjectSlug } from "@/lib/project-slug";
 const PROJECT_COLUMNS =
   "id, title, description, img, link, github, pdf, features, tech_stack, order_index, created_at";
 
+const PINNED_RIFQI_PROFILE_IMAGE = resolveAssetUrl("assets/rifqi.jpg");
+
+const DEFAULT_COMMENT_PROFILE_IMAGE = "/img/screen/default-avatar.jpg";
+
 function normalizeProject(project) {
   return {
     ...project,
@@ -34,10 +38,21 @@ function normalizeCertificate(certificate) {
   };
 }
 
+function isPinnedRifqiComment(comment) {
+  return (
+    comment.is_pinned === true &&
+    String(comment.user_name || "")
+      .trim()
+      .toLowerCase() === "rifqi"
+  );
+}
+
 function normalizeComment(comment) {
   return {
     ...comment,
-    profile_image: resolveAssetUrl(comment.profile_image),
+    profile_image: isPinnedRifqiComment(comment)
+      ? PINNED_RIFQI_PROFILE_IMAGE
+      : DEFAULT_COMMENT_PROFILE_IMAGE,
   };
 }
 
@@ -186,7 +201,7 @@ export async function getComments() {
 
   const { data, error } = await supabase
     .from("portfolio_comments")
-    .select("id, content, user_name, profile_image, is_pinned, created_at")
+    .select("id, content, user_name, is_pinned, created_at")
     .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false });
 
