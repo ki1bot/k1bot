@@ -1,24 +1,112 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Loader2, MessageSquare, Send, User } from "lucide-react";
+import {
+  CheckCircle2,
+  CircleAlert,
+  Loader2,
+  MessageSquare,
+  Send,
+  User,
+  X,
+} from "lucide-react";
 
 import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const DEFAULT_PROFILE_IMAGE = "/img/screen/default-avatar.jpg";
+const NOTIFICATION_DURATION = 4000;
+const NOTIFICATION_EXIT_DURATION = 250;
 
 const fieldClassName =
   "w-full rounded-2xl border border-white/10 bg-white/[0.06] text-sm text-white caret-white outline-none transition placeholder:text-blue-100/35 focus:border-violet-300/35 focus:bg-white/[0.09] autofill:border-white/10 autofill:shadow-[0_0_0_1000px_rgba(255,255,255,0.06)_inset] autofill:[-webkit-text-fill-color:white] autofill:caret-white autofill:transition-[background-color] autofill:duration-[999999s]";
 
+function CommentNotification({ notification, isVisible, onClose }) {
+  if (!notification || typeof document === "undefined") {
+    return null;
+  }
+
+  const isSuccess = notification.type === "success";
+
+  return createPortal(
+    <div
+      className="pointer-events-none fixed inset-x-0 top-4 z-[99999] flex justify-center px-4 sm:top-6"
+      aria-live={isSuccess ? "polite" : "assertive"}
+      aria-atomic="true"
+    >
+      <div
+        role={isSuccess ? "status" : "alert"}
+        className={`pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-2xl border px-4 py-3.5 shadow-2xl backdrop-blur-xl transition-all duration-300 ease-out sm:px-5 ${
+          isVisible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
+        } ${
+          isSuccess
+            ? "border-emerald-300/25 bg-emerald-950/95 shadow-emerald-950/40"
+            : "border-red-300/25 bg-red-950/95 shadow-red-950/40"
+        }`}
+      >
+        <div
+          className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ${
+            isSuccess
+              ? "bg-emerald-400/15 text-emerald-300"
+              : "bg-red-400/15 text-red-300"
+          }`}
+        >
+          {isSuccess ? (
+            <CheckCircle2 className="size-5" />
+          ) : (
+            <CircleAlert className="size-5" />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p
+            className={`text-sm font-bold ${
+              isSuccess ? "text-emerald-100" : "text-red-100"
+            }`}
+          >
+            {isSuccess ? "Berhasil" : "Terjadi Kesalahan"}
+          </p>
+
+          <p
+            className={`mt-1 text-sm leading-6 ${
+              isSuccess ? "text-emerald-100/75" : "text-red-100/75"
+            }`}
+          >
+            {notification.message}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          className={`flex size-8 shrink-0 self-center items-center justify-center rounded-lg transition ${
+            isSuccess
+              ? "text-emerald-100/60 hover:bg-emerald-400/15 hover:text-emerald-100"
+              : "text-red-100/60 hover:bg-red-400/15 hover:text-red-100"
+          }`}
+          aria-label="Tutup notifikasi"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 export function CommentForm({ messageFieldHeight = null }) {
   const router = useRouter();
+
+  const notificationTimerRef = useRef(null);
+  const notificationExitTimerRef = useRef(null);
+  const notificationFrameRef = useRef(null);
 
   const [userName, setUserName] = useState("");
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState("");
+  const [notification, setNotification] = useState(null);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
 
   const isFormValid = useMemo(() => {
     return userName.trim().length > 0 && content.trim().length > 0;
@@ -33,37 +121,97 @@ export function CommentForm({ messageFieldHeight = null }) {
         }
       : undefined;
 
-  function resetStatus() {
-    setStatusMessage("");
-    setStatusType("");
+  useEffect(() => {
+    return () => {
+      if (notificationTimerRef.current) {
+        window.clearTimeout(notificationTimerRef.current);
+      }
+
+      if (notificationExitTimerRef.current) {
+        window.clearTimeout(notificationExitTimerRef.current);
+      }
+
+      if (notificationFrameRef.current) {
+        window.cancelAnimationFrame(notificationFrameRef.current);
+      }
+    };
+  }, []);
+
+  function clearNotificationTimers() {
+    if (notificationTimerRef.current) {
+      window.clearTimeout(notificationTimerRef.current);
+      notificationTimerRef.current = null;
+    }
+
+    if (notificationExitTimerRef.current) {
+      window.clearTimeout(notificationExitTimerRef.current);
+      notificationExitTimerRef.current = null;
+    }
+
+    if (notificationFrameRef.current) {
+      window.cancelAnimationFrame(notificationFrameRef.current);
+      notificationFrameRef.current = null;
+    }
+  }
+
+  function removeNotification() {
+    setNotification(null);
+    setIsNotificationVisible(false);
+  }
+
+  function closeNotification() {
+    clearNotificationTimers();
+    setIsNotificationVisible(false);
+
+    notificationExitTimerRef.current = window.setTimeout(() => {
+      removeNotification();
+    }, NOTIFICATION_EXIT_DURATION);
+  }
+
+  function showNotification(type, message) {
+    clearNotificationTimers();
+
+    setIsNotificationVisible(false);
+    setNotification({
+      type,
+      message,
+    });
+
+    notificationFrameRef.current = window.requestAnimationFrame(() => {
+      setIsNotificationVisible(true);
+      notificationFrameRef.current = null;
+    });
+
+    notificationTimerRef.current = window.setTimeout(() => {
+      setIsNotificationVisible(false);
+
+      notificationExitTimerRef.current = window.setTimeout(() => {
+        removeNotification();
+      }, NOTIFICATION_EXIT_DURATION);
+    }, NOTIFICATION_DURATION);
   }
 
   function handleUserNameChange(event) {
     setUserName(event.target.value);
-    resetStatus();
   }
 
   function handleContentChange(event) {
     setContent(event.target.value);
-    resetStatus();
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    resetStatus();
 
     const normalizedUserName = userName.trim();
     const normalizedContent = content.trim();
 
     if (!normalizedUserName || !normalizedContent) {
-      setStatusType("error");
-      setStatusMessage("Nama dan komentar wajib diisi.");
+      showNotification("error", "Nama dan komentar wajib diisi.");
       return;
     }
 
     if (!isSupabaseConfigured || !supabase) {
-      setStatusType("error");
-      setStatusMessage("Supabase belum dikonfigurasi dengan benar.");
+      showNotification("error", "Supabase belum dikonfigurasi dengan benar.");
       return;
     }
 
@@ -78,100 +226,93 @@ export function CommentForm({ messageFieldHeight = null }) {
       });
 
       if (error) {
-        throw new Error(error.message);
+        throw error;
       }
 
       setUserName("");
       setContent("");
-      setStatusType("success");
-      setStatusMessage("Komentar berhasil dikirim.");
+
+      showNotification("success", "Komentar berhasil dikirim.");
 
       router.refresh();
     } catch (error) {
-      setStatusType("error");
-      setStatusMessage(
-        error instanceof Error
-          ? error.message
-          : "Gagal mengirim komentar. Coba lagi nanti.",
-      );
+      console.error("COMMENT_SUBMIT_ERROR:", error);
+
+      showNotification("error", "Gagal mengirim komentar. Coba lagi nanti.");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="comment-name" className="sr-only">
-          Nama
-        </label>
+    <>
+      <CommentNotification
+        notification={notification}
+        isVisible={isNotificationVisible}
+        onClose={closeNotification}
+      />
 
-        <div className="relative">
-          <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/45 sm:left-5" />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="comment-name" className="sr-only">
+            Nama
+          </label>
 
-          <input
-            id="comment-name"
-            type="text"
-            name="commenter-name"
-            value={userName}
-            onChange={handleUserNameChange}
-            placeholder="Masukkan nama Anda"
-            autoComplete="name"
-            className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14 sm:pl-12 sm:pr-5`}
-          />
+          <div className="relative">
+            <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/45 sm:left-5" />
+
+            <input
+              id="comment-name"
+              type="text"
+              name="commenter-name"
+              value={userName}
+              onChange={handleUserNameChange}
+              placeholder="Masukkan nama Anda"
+              autoComplete="name"
+              className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14 sm:pl-12 sm:pr-5`}
+            />
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label htmlFor="comment-message" className="sr-only">
-          Pesan
-        </label>
+        <div>
+          <label htmlFor="comment-message" className="sr-only">
+            Pesan
+          </label>
 
-        <div className="relative">
-          <MessageSquare className="pointer-events-none absolute left-4 top-5 z-10 size-4 text-blue-100/45 sm:left-5" />
+          <div className="relative">
+            <MessageSquare className="pointer-events-none absolute left-4 top-5 z-10 size-4 text-blue-100/45 sm:left-5" />
 
-          <textarea
-            id="comment-message"
-            name="comment-message"
-            value={content}
-            onChange={handleContentChange}
-            placeholder="Tulis pesan Anda di sini..."
-            rows={7}
-            style={messageFieldStyle}
-            className={`${fieldClassName} min-h-[198px] resize-none py-4 pl-11 pr-4 sm:min-h-[206px] sm:pl-12 sm:pr-5`}
-          />
+            <textarea
+              id="comment-message"
+              name="comment-message"
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Tulis pesan Anda di sini..."
+              rows={7}
+              style={messageFieldStyle}
+              className={`${fieldClassName} min-h-[198px] resize-none py-4 pl-11 pr-4 sm:min-h-[206px] sm:pl-12 sm:pr-5`}
+            />
+          </div>
         </div>
-      </div>
 
-      {statusMessage ? (
-        <div
-          className={`rounded-2xl border px-4 py-3 text-sm leading-6 ${
-            statusType === "success"
-              ? "border-emerald-300/20 bg-emerald-500/10 text-emerald-100"
-              : "border-red-300/20 bg-red-500/10 text-red-100"
-          }`}
+        <button
+          type="submit"
+          disabled={isSubmitting || !isFormValid}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-xl shadow-violet-500/20 transition hover:-translate-y-0.5 hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:h-14"
         >
-          {statusMessage}
-        </div>
-      ) : null}
-
-      <button
-        type="submit"
-        disabled={isSubmitting || !isFormValid}
-        className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-xl shadow-violet-500/20 transition hover:-translate-y-0.5 hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:h-14"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Mengirim...
-          </>
-        ) : (
-          <>
-            <Send className="size-4" />
-            Kirim Komentar
-          </>
-        )}
-      </button>
-    </form>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Mengirim...
+            </>
+          ) : (
+            <>
+              <Send className="size-4" />
+              Kirim Komentar
+            </>
+          )}
+        </button>
+      </form>
+    </>
   );
 }
