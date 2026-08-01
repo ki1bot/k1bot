@@ -8,6 +8,9 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const DEFAULT_PROFILE_IMAGE = "/img/screen/default-avatar.jpg";
 
+const fieldClassName =
+  "w-full rounded-2xl border border-white/10 bg-white/[0.06] text-sm text-white caret-white outline-none transition placeholder:text-blue-100/35 focus:border-violet-300/35 focus:bg-white/[0.09] autofill:border-white/10 autofill:shadow-[0_0_0_1000px_rgba(255,255,255,0.06)_inset] autofill:[-webkit-text-fill-color:white] autofill:caret-white autofill:transition-[background-color] autofill:duration-[999999s]";
+
 export function CommentForm({ messageFieldHeight = null }) {
   const router = useRouter();
 
@@ -104,16 +107,17 @@ export function CommentForm({ messageFieldHeight = null }) {
         </label>
 
         <div className="relative">
-          <User className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-blue-100/45 sm:left-5" />
+          <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/45 sm:left-5" />
 
           <input
             id="comment-name"
             type="text"
+            name="commenter-name"
             value={userName}
             onChange={handleUserNameChange}
             placeholder="Masukkan nama Anda"
             autoComplete="name"
-            className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.06] pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-blue-100/35 focus:border-violet-300/35 focus:bg-white/[0.09] sm:h-14 sm:pl-12 sm:pr-5"
+            className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14 sm:pl-12 sm:pr-5`}
           />
         </div>
       </div>
@@ -124,16 +128,17 @@ export function CommentForm({ messageFieldHeight = null }) {
         </label>
 
         <div className="relative">
-          <MessageSquare className="pointer-events-none absolute left-4 top-5 size-4 text-blue-100/45 sm:left-5" />
+          <MessageSquare className="pointer-events-none absolute left-4 top-5 z-10 size-4 text-blue-100/45 sm:left-5" />
 
           <textarea
             id="comment-message"
+            name="comment-message"
             value={content}
             onChange={handleContentChange}
             placeholder="Tulis pesan Anda di sini..."
             rows={7}
             style={messageFieldStyle}
-            className="min-h-[198px] w-full resize-none rounded-2xl border border-white/10 bg-white/[0.06] py-4 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-blue-100/35 focus:border-violet-300/35 focus:bg-white/[0.09] sm:min-h-[206px] sm:pl-12 sm:pr-5"
+            className={`${fieldClassName} min-h-[198px] resize-none py-4 pl-11 pr-4 sm:min-h-[206px] sm:pl-12 sm:pr-5`}
           />
         </div>
       </div>

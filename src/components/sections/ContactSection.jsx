@@ -264,7 +264,7 @@ export function ContactSection({ comments = [] }) {
                       Hubungi
                     </h3>
 
-                    <p className="mt-3 max-w-sm text-sm leading-7 text-blue-100/70">
+                    <p className="mt-3 max-w-sm text-[0.95rem] leading-7 text-blue-100/70 sm:text-base">
                       Ada yang ingin didiskusikan? Kirim saya pesan dan mari
                       kita bicara.
                     </p>
