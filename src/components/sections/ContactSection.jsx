@@ -68,15 +68,27 @@ function SocialIcon({ item, className = "h-full w-full" }) {
 export function ContactSection({ comments = [] }) {
   const hubungiCardRef = useRef(null);
   const hubungiHeaderRef = useRef(null);
+  const hubungiTopContentRef = useRef(null);
+  const commentsTopContentRef = useRef(null);
 
   const [commentsCardHeight, setCommentsCardHeight] = useState(null);
   const [commentsHeaderHeight, setCommentsHeaderHeight] = useState(null);
+  const [commentsTopSpacerHeight, setCommentsTopSpacerHeight] = useState(0);
 
   useLayoutEffect(() => {
     const hubungiCard = hubungiCardRef.current;
     const hubungiHeader = hubungiHeaderRef.current;
+    const hubungiTopContent = hubungiTopContentRef.current;
+    const commentsTopContent = commentsTopContentRef.current;
 
-    if (!hubungiCard || !hubungiHeader) return;
+    if (
+      !hubungiCard ||
+      !hubungiHeader ||
+      !hubungiTopContent ||
+      !commentsTopContent
+    ) {
+      return;
+    }
 
     let animationFrameId = null;
     const timeoutIds = [];
@@ -92,11 +104,18 @@ export function ContactSection({ comments = [] }) {
         if (!isDesktop) {
           setCommentsCardHeight(null);
           setCommentsHeaderHeight(null);
+          setCommentsTopSpacerHeight(0);
           return;
         }
 
         const nextCardHeight = Math.ceil(hubungiCard.offsetHeight);
         const nextHeaderHeight = Math.ceil(hubungiHeader.offsetHeight);
+        const hubungiTopHeight = Math.ceil(hubungiTopContent.offsetHeight);
+        const commentsTopHeight = Math.ceil(commentsTopContent.offsetHeight);
+        const nextSpacerHeight = Math.max(
+          0,
+          hubungiTopHeight - commentsTopHeight,
+        );
 
         setCommentsCardHeight((currentHeight) => {
           if (
@@ -119,6 +138,14 @@ export function ContactSection({ comments = [] }) {
 
           return nextHeaderHeight;
         });
+
+        setCommentsTopSpacerHeight((currentHeight) => {
+          if (Math.abs(currentHeight - nextSpacerHeight) <= 1) {
+            return currentHeight;
+          }
+
+          return nextSpacerHeight;
+        });
       });
     }
 
@@ -135,6 +162,8 @@ export function ContactSection({ comments = [] }) {
 
     resizeObserver.observe(hubungiCard);
     resizeObserver.observe(hubungiHeader);
+    resizeObserver.observe(hubungiTopContent);
+    resizeObserver.observe(commentsTopContent);
 
     const images = Array.from(hubungiCard.querySelectorAll("img"));
 
@@ -193,6 +222,14 @@ export function ContactSection({ comments = [] }) {
         }
       : undefined;
 
+  const commentsTopSpacerStyle =
+    commentsTopSpacerHeight > 0
+      ? {
+          height: `${commentsTopSpacerHeight}px`,
+          minHeight: `${commentsTopSpacerHeight}px`,
+        }
+      : undefined;
+
   return (
     <section id="contact" className="border-t border-white/10 py-20 md:py-32">
       <div className="mx-auto max-w-[1320px] px-4 sm:px-6 md:px-10">
@@ -217,26 +254,28 @@ export function ContactSection({ comments = [] }) {
               ref={hubungiCardRef}
               className="rounded-[1.5rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-5 md:rounded-[1.75rem] md:p-7"
             >
-              <div
-                ref={hubungiHeaderRef}
-                className="flex items-start justify-between gap-5"
-              >
-                <div>
-                  <h3 className="text-3xl font-black tracking-tight text-white md:text-4xl">
-                    Hubungi
-                  </h3>
+              <div ref={hubungiTopContentRef}>
+                <div
+                  ref={hubungiHeaderRef}
+                  className="flex items-start justify-between gap-5"
+                >
+                  <div>
+                    <h3 className="text-3xl font-black tracking-tight text-white md:text-4xl">
+                      Hubungi
+                    </h3>
 
-                  <p className="mt-3 max-w-sm text-sm leading-7 text-blue-100/70">
-                    Ada yang ingin didiskusikan? Kirim saya pesan dan mari kita
-                    bicara.
-                  </p>
+                    <p className="mt-3 max-w-sm text-sm leading-7 text-blue-100/70">
+                      Ada yang ingin didiskusikan? Kirim saya pesan dan mari
+                      kita bicara.
+                    </p>
+                  </div>
+
+                  <Share2 className="mt-1 size-5 shrink-0 text-violet-200" />
                 </div>
 
-                <Share2 className="mt-1 size-5 shrink-0 text-violet-200" />
-              </div>
-
-              <div className="mt-8">
-                <ContactMessageForm />
+                <div className="mt-8">
+                  <ContactMessageForm />
+                </div>
               </div>
 
               <div className="my-8 h-px bg-white/10" />
@@ -287,34 +326,42 @@ export function ContactSection({ comments = [] }) {
               className="flex min-h-0 overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.08] p-4 shadow-2xl shadow-blue-950/20 backdrop-blur-xl sm:p-5 md:rounded-[1.75rem] md:p-7"
             >
               <div className="flex min-h-0 w-full flex-col">
-                <div
-                  style={commentsHeaderLockedStyle}
-                  className="shrink-0 overflow-hidden"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 text-violet-200">
-                      <MessageCircleMore className="size-5" />
+                <div ref={commentsTopContentRef} className="shrink-0">
+                  <div
+                    style={commentsHeaderLockedStyle}
+                    className="shrink-0 overflow-hidden"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 text-violet-200">
+                        <MessageCircleMore className="size-5" />
+                      </div>
+
+                      <div className="min-w-0">
+                        <h3 className="text-2xl font-bold text-white sm:text-[1.65rem]">
+                          Komentar{" "}
+                          <span className="text-violet-300">
+                            ({comments.length})
+                          </span>
+                        </h3>
+                      </div>
                     </div>
 
-                    <div className="min-w-0">
-                      <h3 className="text-2xl font-bold text-white sm:text-[1.65rem]">
-                        Komentar{" "}
-                        <span className="text-violet-300">
-                          ({comments.length})
-                        </span>
-                      </h3>
-                    </div>
+                    <p className="mt-4 shrink-0 text-[0.95rem] leading-7 text-blue-100/70 sm:max-w-xl sm:text-base">
+                      Tinggalkan komentar, saran, atau tanggapan mengenai
+                      portofolio ini.
+                    </p>
                   </div>
 
-                  <p className="mt-4 shrink-0 text-[0.95rem] leading-7 text-blue-100/70 sm:max-w-xl sm:text-base">
-                    Tinggalkan komentar, saran, atau tanggapan mengenai
-                    portofolio ini.
-                  </p>
+                  <div className="mt-8 shrink-0">
+                    <CommentForm />
+                  </div>
                 </div>
 
-                <div className="mt-8 shrink-0">
-                  <CommentForm />
-                </div>
+                <div
+                  style={commentsTopSpacerStyle}
+                  className="shrink-0"
+                  aria-hidden="true"
+                />
 
                 <div className="my-8 h-px shrink-0 bg-white/10" />
 

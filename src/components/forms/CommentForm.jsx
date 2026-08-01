@@ -8,7 +8,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 const DEFAULT_PROFILE_IMAGE = "/img/screen/default-avatar.jpg";
 
-export function CommentForm() {
+export function CommentForm({ messageFieldHeight = null }) {
   const router = useRouter();
 
   const [userName, setUserName] = useState("");
@@ -20,6 +20,15 @@ export function CommentForm() {
   const isFormValid = useMemo(() => {
     return userName.trim().length > 0 && content.trim().length > 0;
   }, [userName, content]);
+
+  const messageFieldStyle =
+    typeof messageFieldHeight === "number"
+      ? {
+          height: `${messageFieldHeight}px`,
+          minHeight: `${messageFieldHeight}px`,
+          maxHeight: `${messageFieldHeight}px`,
+        }
+      : undefined;
 
   function resetStatus() {
     setStatusMessage("");
@@ -123,7 +132,8 @@ export function CommentForm() {
             onChange={handleContentChange}
             placeholder="Tulis pesan Anda di sini..."
             rows={7}
-            className="min-h-[184px] w-full resize-none rounded-2xl border border-white/10 bg-white/[0.06] py-4 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-blue-100/35 focus:border-violet-300/35 focus:bg-white/[0.09] sm:min-h-[192px] sm:pl-12 sm:pr-5"
+            style={messageFieldStyle}
+            className="min-h-[198px] w-full resize-none rounded-2xl border border-white/10 bg-white/[0.06] py-4 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-blue-100/35 focus:border-violet-300/35 focus:bg-white/[0.09] sm:min-h-[206px] sm:pl-12 sm:pr-5"
           />
         </div>
       </div>
