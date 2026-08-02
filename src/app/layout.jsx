@@ -43,9 +43,8 @@ export default function RootLayout({ children }) {
       <body
         className="portfolio-loading-active"
         style={{
-          "--portfolio-gradient-blue-image": `url("${assetUrl(
-            "assets/gradient-blue.jpg",
-          )}")`,
+          "--portfolio-gradient-blue-image":
+            'url("/img/screen/gradient-blue.jpg")',
         }}
       >
         <ReloadToHome />
