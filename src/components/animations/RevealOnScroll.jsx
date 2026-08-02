@@ -92,6 +92,7 @@ export function RevealOnScroll({
   y = 32,
   scale = 0.985,
   once = false,
+  eager = false,
   as: Component = "div",
 }) {
   const elementRef = useRef(null);
@@ -106,6 +107,30 @@ export function RevealOnScroll({
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
+
+    if (prefersReducedMotion) {
+      element.style.setProperty("--reveal-delay", "0ms");
+      element.style.willChange = "auto";
+      element.classList.add("reveal-on-scroll-visible");
+      element.classList.remove("reveal-on-scroll-eager");
+
+      return;
+    }
+
+    if (eager) {
+      const completionTimer = window.setTimeout(
+        () => {
+          element.classList.add("reveal-on-scroll-visible");
+          element.classList.remove("reveal-on-scroll-eager");
+          element.style.willChange = "auto";
+        },
+        REVEAL_TRANSITION_DURATION + delay + 50,
+      );
+
+      return () => {
+        window.clearTimeout(completionTimer);
+      };
+    }
 
     let hasRevealed = element.classList.contains("reveal-on-scroll-visible");
 
@@ -161,16 +186,6 @@ export function RevealOnScroll({
       releaseWillChange();
     };
 
-    if (prefersReducedMotion) {
-      element.style.setProperty("--reveal-delay", "0ms");
-      element.style.willChange = "auto";
-      element.classList.add("reveal-on-scroll-visible");
-
-      return () => {
-        clearWillChangeTimer();
-      };
-    }
-
     if (!("IntersectionObserver" in window)) {
       const animationFrameId = window.requestAnimationFrame(showElement);
 
@@ -198,7 +213,7 @@ export function RevealOnScroll({
       stopObserving();
       clearWillChangeTimer();
     };
-  }, [delay, once]);
+  }, [delay, eager, once]);
 
   return (
     <Component
@@ -206,10 +221,14 @@ export function RevealOnScroll({
       style={{
         "--reveal-y": `${y}px`,
         "--reveal-scale": scale,
-        "--reveal-delay": "0ms",
-        willChange: "auto",
+        "--reveal-delay": eager ? `${delay}ms` : "0ms",
+        willChange: eager ? "opacity, filter, transform" : "auto",
       }}
-      className={cn("reveal-on-scroll", className)}
+      className={cn(
+        "reveal-on-scroll",
+        eager && "reveal-on-scroll-eager",
+        className,
+      )}
     >
       {children}
     </Component>
