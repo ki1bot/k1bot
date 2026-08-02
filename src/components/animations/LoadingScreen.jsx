@@ -9,8 +9,6 @@ const MOBILE_REMOVE_DELAY_MS = 1700;
 const DESKTOP_EXIT_DELAY_MS = 2300;
 const DESKTOP_REMOVE_DELAY_MS = 3000;
 
-const PORTFOLIO_READY_EVENT = "portfolio:ready";
-
 const loadingIcons = [
   {
     label: "HTML",
@@ -54,7 +52,6 @@ export function LoadingScreen() {
     const removeTimer = window.setTimeout(() => {
       setIsVisible(false);
       document.body.classList.remove("portfolio-loading-active");
-      window.dispatchEvent(new Event(PORTFOLIO_READY_EVENT));
     }, removeDelay);
 
     return () => {
