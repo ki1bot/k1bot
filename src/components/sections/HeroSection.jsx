@@ -65,6 +65,32 @@ function resetGifMotion(element) {
   element.style.setProperty("--gif-glow-opacity", "0");
 }
 
+function navigateToSection(event, sectionId) {
+  event.preventDefault();
+
+  if (typeof document === "undefined" || typeof window === "undefined") {
+    return;
+  }
+
+  const section = document.getElementById(sectionId);
+
+  if (!section) {
+    return;
+  }
+
+  const navbarOffset = window.innerWidth < 768 ? 84 : 115;
+
+  const sectionPosition =
+    section.getBoundingClientRect().top + window.scrollY - navbarOffset;
+
+  window.history.replaceState(null, "", `#${sectionId}`);
+
+  window.scrollTo({
+    top: Math.max(sectionPosition, 0),
+    behavior: "smooth",
+  });
+}
+
 function useTypewriter(
   words,
   typingSpeed = 75,
@@ -285,7 +311,8 @@ export function HeroSection() {
 
           <div className="mt-8 grid gap-3 sm:flex sm:flex-row sm:gap-4 md:mt-10">
             <a
-              href="/projects"
+              href="#projects"
+              onClick={(event) => navigateToSection(event, "projects")}
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-violet-400/20 bg-slate-950/80 px-6 text-sm font-semibold text-white shadow-xl shadow-violet-950/30 transition hover:-translate-y-1 hover:border-violet-300/40 hover:bg-violet-600/20 sm:w-auto sm:min-w-40"
             >
               Projects
@@ -293,7 +320,8 @@ export function HeroSection() {
             </a>
 
             <a
-              href="/contact"
+              href="#contact"
+              onClick={(event) => navigateToSection(event, "contact")}
               className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-violet-400/20 bg-slate-950/80 px-6 text-sm font-semibold text-white shadow-xl shadow-violet-950/30 transition hover:-translate-y-1 hover:border-violet-300/40 hover:bg-violet-600/20 sm:w-auto sm:min-w-40"
             >
               Contact
