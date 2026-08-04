@@ -1335,3 +1335,192 @@ body.portfolio-loading-active {
 .see-more-button::after {
   cursor: pointer !important;
 }
+
+.profile-orbit-scene {
+  --profile-x: 0px;
+  --profile-y: 0px;
+  --profile-rotate-x: 0deg;
+  --profile-rotate-y: 0deg;
+  --profile-scale: 1;
+  --profile-ring-x: 0px;
+  --profile-ring-y: 0px;
+  --profile-ring-x-reverse: 0px;
+  --profile-ring-y-reverse: 0px;
+  --profile-ring-scale-one: 1;
+  --profile-ring-scale-two: 1;
+  --profile-ring-scale-three: 1;
+  --profile-ring-scale-four: 1;
+  --profile-spot-x: 50%;
+  --profile-spot-y: 50%;
+  --profile-glow-opacity: 0;
+
+  isolation: isolate;
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+
+.profile-orbit-pointer-glow {
+  background: radial-gradient(
+    circle at var(--profile-spot-x) var(--profile-spot-y),
+    rgba(103, 232, 249, 0.22),
+    rgba(139, 92, 246, 0.12) 28%,
+    transparent 62%
+  );
+  opacity: var(--profile-glow-opacity);
+  transform: scale(0.92);
+  transition:
+    opacity 500ms ease,
+    transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-pointer-glow {
+  transform: scale(1.08);
+}
+
+.profile-orbit-ring {
+  transition:
+    border-color 350ms ease,
+    box-shadow 350ms ease,
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.profile-orbit-ring-one {
+  transform: translate3d(var(--profile-ring-x), var(--profile-ring-y), 0)
+    scale(var(--profile-ring-scale-one));
+}
+
+.profile-orbit-ring-two {
+  transform: translate3d(
+      var(--profile-ring-x-reverse),
+      var(--profile-ring-y-reverse),
+      0
+    )
+    scale(var(--profile-ring-scale-two));
+}
+
+.profile-orbit-ring-three {
+  transform: translate3d(
+      var(--profile-ring-x),
+      var(--profile-ring-y-reverse),
+      0
+    )
+    scale(var(--profile-ring-scale-three));
+}
+
+.profile-orbit-ring-four {
+  transform: translate3d(
+      var(--profile-ring-x-reverse),
+      var(--profile-ring-y),
+      0
+    )
+    scale(var(--profile-ring-scale-four));
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-ring-one {
+  border-color: rgba(196, 181, 253, 0.38);
+  box-shadow: 0 0 26px rgba(139, 92, 246, 0.1);
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-ring-two {
+  border-color: rgba(147, 197, 253, 0.34);
+  box-shadow: 0 0 22px rgba(59, 130, 246, 0.1);
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-ring-three {
+  border-color: rgba(221, 214, 254, 0.3);
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-ring-four {
+  border-color: rgba(186, 230, 253, 0.3);
+}
+
+.profile-orbit-track {
+  animation-duration: 7s;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  animation-timing-function: linear;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.profile-orbit-track-one {
+  animation-name: profileOrbitClockwise;
+}
+
+.profile-orbit-track-two {
+  animation-name: profileOrbitClockwise;
+  animation-duration: 5.4s;
+  animation-direction: reverse;
+}
+
+.profile-orbit-track-three {
+  animation-name: profileOrbitClockwise;
+  animation-duration: 4.2s;
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-track {
+  animation-play-state: running;
+}
+
+.profile-orbit-avatar {
+  z-index: 10;
+  transform: translate3d(var(--profile-x), var(--profile-y), 0)
+    rotateX(var(--profile-rotate-x)) rotateY(var(--profile-rotate-y))
+    scale(var(--profile-scale));
+  transform-style: preserve-3d;
+  transition:
+    box-shadow 420ms ease,
+    transform 170ms linear;
+  will-change: transform;
+}
+
+.profile-orbit-scene.is-profile-near .profile-orbit-avatar {
+  box-shadow:
+    0 26px 70px rgba(59, 130, 246, 0.42),
+    0 0 34px rgba(139, 92, 246, 0.28);
+}
+
+.profile-orbit-avatar-shine {
+  z-index: 20;
+  background: radial-gradient(
+    circle at var(--profile-spot-x) var(--profile-spot-y),
+    rgba(255, 255, 255, 0.24),
+    transparent 32%
+  );
+  opacity: var(--profile-glow-opacity);
+  transition: opacity 350ms ease;
+}
+
+@keyframes profileOrbitClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-orbit-pointer-glow,
+  .profile-orbit-ring,
+  .profile-orbit-track,
+  .profile-orbit-avatar,
+  .profile-orbit-avatar-shine {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .profile-orbit-ring,
+  .profile-orbit-track,
+  .profile-orbit-avatar {
+    transform: none !important;
+  }
+
+  .profile-orbit-pointer-glow,
+  .profile-orbit-avatar-shine {
+    opacity: 0 !important;
+  }
+}

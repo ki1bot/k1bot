@@ -9,14 +9,15 @@ import { PERSONAL_INFO } from "@/lib/constants";
 import { assetUrl } from "@/lib/supabase-storage";
 
 const heroStacks = [
+  "HTML",
+  "CSS",
   "JavaScript",
   "TypeScript",
-  "React",
-  "Next.JS",
-  "Vue.JS",
+  "PHP",
   "Node.JS",
   "Bootstrap",
   "Tailwind CSS",
+  "React",
 ];
 
 const heroRoles = ["Fullstack Website", "Mobile Application"];
