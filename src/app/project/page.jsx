@@ -40,6 +40,29 @@ function getSearchParamValue(searchParams, key) {
   return value;
 }
 
+function isDownloadableFile(url) {
+  return /\.(?:exe|zip|rar|7z|msi)(?:\?.*)?$/i.test(url || "");
+}
+
+function getDownloadFileName(url) {
+  if (!url) {
+    return undefined;
+  }
+
+  const path = url.split("?")[0];
+  const fileName = path.split("/").pop();
+
+  if (!fileName) {
+    return undefined;
+  }
+
+  try {
+    return decodeURIComponent(fileName);
+  } catch {
+    return fileName;
+  }
+}
+
 async function resolveProject(searchParams) {
   const projectId = getSearchParamValue(searchParams, "id");
   const projectSlug = getSearchParamValue(searchParams, "slug");
@@ -90,6 +113,10 @@ export default async function ProjectDetailPage({ searchParams }) {
   const projectTitle = project.title || "Untitled Project";
   const projectDescription =
     project.description || "Deskripsi project belum tersedia.";
+  const downloadableDemo = isDownloadableFile(project.link);
+  const downloadFileName = downloadableDemo
+    ? getDownloadFileName(project.link)
+    : undefined;
 
   return (
     <main className="project-detail-page min-h-screen overflow-hidden bg-[#050816] text-white">
@@ -170,8 +197,9 @@ export default async function ProjectDetailPage({ searchParams }) {
                 {project.link && (
                   <a
                     href={project.link}
-                    target="_blank"
-                    rel="noreferrer"
+                    target={downloadableDemo ? undefined : "_blank"}
+                    rel={downloadableDemo ? undefined : "noreferrer"}
+                    download={downloadFileName}
                     className="video-hover-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-blue-400/25 bg-blue-500/10 px-6 text-sm font-bold text-blue-200 shadow-xl shadow-blue-950/20 min-[430px]:w-auto sm:h-14 sm:min-w-36 sm:px-7"
                   >
                     <ExternalLink className="size-4" />

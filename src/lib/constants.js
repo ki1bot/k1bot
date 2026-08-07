@@ -259,7 +259,7 @@ export const FALLBACK_PROJECTS = [
     description:
       "Game Ini adalah Tugas akhir kelompok 1, yang berbasis game RPG survival desktop berbasis Java Swing, pemain bertahan dari serangan Flea dengan sistem HP, RP, animasi, dan sound effect.",
     img: assetUrl("projects/flea-defender.png"),
-    link: "",
+    link: "/games/The%20Flea%20Defender-1.0.0.exe",
     github: "https://github.com/ki1bot/The-Flea-Defender.git",
     features: [
       "Game RPG survival berbasis GUI desktop",

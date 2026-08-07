@@ -15,6 +15,29 @@ function canUseNextImage(imageUrl) {
   return imageUrl.startsWith("/") && !/\.(?:gif|svg)(?:\?.*)?$/i.test(imageUrl);
 }
 
+function isDownloadableFile(url) {
+  return /\.(?:exe|zip|rar|7z|msi)(?:\?.*)?$/i.test(url || "");
+}
+
+function getDownloadFileName(url) {
+  if (!url) {
+    return undefined;
+  }
+
+  const path = url.split("?")[0];
+  const fileName = path.split("/").pop();
+
+  if (!fileName) {
+    return undefined;
+  }
+
+  try {
+    return decodeURIComponent(fileName);
+  } catch {
+    return fileName;
+  }
+}
+
 function getPortfolioReturnLocation() {
   const returnLocation = new URL(window.location.href);
 
@@ -38,6 +61,11 @@ export const ProjectCard = memo(function ProjectCard({ project }) {
         projectSlug,
       )}`
     : `/project?slug=${encodeURIComponent(projectSlug)}`;
+
+  const downloadableDemo = isDownloadableFile(project.link);
+  const downloadFileName = downloadableDemo
+    ? getDownloadFileName(project.link)
+    : undefined;
 
   function handleDetailNavigation(event) {
     if (
@@ -118,8 +146,9 @@ export const ProjectCard = memo(function ProjectCard({ project }) {
           {project.link ? (
             <a
               href={project.link}
-              target="_blank"
-              rel="noreferrer"
+              target={downloadableDemo ? undefined : "_blank"}
+              rel={downloadableDemo ? undefined : "noreferrer"}
+              download={downloadFileName}
               className="inline-flex items-center justify-center gap-2 text-sm font-bold text-blue-400 transition duration-300 hover:text-blue-300 min-[430px]:justify-start"
             >
               Live Demo
