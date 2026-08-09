@@ -355,7 +355,7 @@ export const FALLBACK_PROJECTS = [
     description:
       "AksesCheck ID adalah aplikasi pemeriksaan aksesibilitas website yang memindai satu halaman berdasarkan aturan WCAG 2.2 Level A dan AA yang dapat diperiksa secara otomatis oleh axe-core. Proses scan dijalankan melalui antrean Redis dan Asynq menggunakan worker Go, Chromium, dan chromedp. Hasil pemeriksaan menampilkan skor indikator internal, tingkat dampak pelanggaran, aturan yang dilanggar, DOM snippet, selector, failure summary, saran perbaikan, pemeriksaan manual, histori scan, serta laporan JSON dan PDF. Aplikasi juga dilengkapi autentikasi berbasis session cookie HTTP-only, perlindungan CSRF, validasi SSRF, rate limiting, dan pembatasan resource.",
     img: assetUrl("projects/AksesibilitasWebsite.png"),
-    link: "",
+    link: "https://aksesibilitas-website.vercel.app/",
     github: "https://github.com/ki1bot/aksesibilitas-website.git",
     features: [
       "Registrasi, login, logout, dan autentikasi menggunakan session cookie HTTP-only",
