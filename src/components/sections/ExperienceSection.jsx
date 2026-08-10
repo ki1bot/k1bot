@@ -40,8 +40,8 @@ const educationTimeline = [
   },
   {
     year: "2024 - Sekarang",
-    title: "Universitas Gunadarma",
-    description: "S1 - Sistem Informasi",
+    title: "Perguruan Tinggi",
+    description: "Universitas Gunadarma, S1 - Sistem Informasi",
     side: "right",
     icon: BookOpenText,
   },
