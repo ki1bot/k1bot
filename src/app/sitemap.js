@@ -1,35 +1,30 @@
-import { getProjects } from "@/lib/portfolio-api";
-import { createProjectSlug } from "@/lib/project-slug";
+const baseUrl = "http://localhost:3000";
 
-const baseUrl = "https://www.rifqii.com";
-
-export const revalidate = 3600;
-
-export default async function sitemap() {
-  const projects = await getProjects();
-  const now = new Date();
-
-  const projectEntries = projects
-    .filter((project) => project?.id != null && project?.title)
-    .map((project) => {
-      const projectId = encodeURIComponent(String(project.id));
-      const projectSlug = encodeURIComponent(createProjectSlug(project.title));
-
-      return {
-        url: `${baseUrl}/project?id=${projectId}&slug=${projectSlug}`,
-        lastModified: now,
-        changeFrequency: "monthly",
-        priority: 0.8,
-      };
-    });
-
+export default function sitemap() {
   return [
     {
       url: `${baseUrl}/`,
-      lastModified: now,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
     },
-    ...projectEntries,
+    {
+      url: `${baseUrl}/about`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/projects`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
   ];
 }

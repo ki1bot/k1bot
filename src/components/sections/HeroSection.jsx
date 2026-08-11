@@ -42,6 +42,9 @@ const heroSocials = [
 
 const HERO_GIF_SOURCE = assetUrl("projects/coding.gif");
 
+const TRANSPARENT_GIF =
+  "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
+
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -162,6 +165,65 @@ function useTypewriter(
 export function HeroSection() {
   const typedRole = useTypewriter(heroRoles);
   const gifFieldRef = useRef(null);
+  const [shouldLoadGif, setShouldLoadGif] = useState(false);
+
+  useEffect(() => {
+    const gifField = gifFieldRef.current;
+
+    if (!gifField) {
+      return;
+    }
+
+    const desktopMediaQuery = window.matchMedia("(min-width: 1024px)");
+    let animationFrameId = 0;
+
+    function scheduleGifLoad() {
+      animationFrameId = window.requestAnimationFrame(() => {
+        setShouldLoadGif(true);
+      });
+    }
+
+    if (desktopMediaQuery.matches) {
+      scheduleGifLoad();
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      scheduleGifLoad();
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const isVisible = entries.some((entry) => entry.isIntersecting);
+
+        if (!isVisible) {
+          return;
+        }
+
+        setShouldLoadGif(true);
+        observer.disconnect();
+      },
+      {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.01,
+      },
+    );
+
+    observer.observe(gifField);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+      observer.disconnect();
+    };
+  }, []);
 
   function handleGifPointerMove(event) {
     const element = event.currentTarget;
@@ -306,12 +368,13 @@ export function HeroSection() {
             className="hero-gif-field relative mx-auto flex w-full max-w-[320px] cursor-pointer items-center justify-center bg-transparent sm:max-w-[420px] md:max-w-[520px] lg:max-w-[720px]"
           >
             <Image
-              src={HERO_GIF_SOURCE}
+              src={shouldLoadGif ? HERO_GIF_SOURCE : TRANSPARENT_GIF}
               alt="Frontend development illustration"
               width={690}
               height={690}
               sizes="(max-width: 639px) 320px, (max-width: 767px) 420px, (max-width: 1023px) 520px, 690px"
-              preload
+              loading={shouldLoadGif ? "eager" : "lazy"}
+              fetchPriority={shouldLoadGif ? "high" : "low"}
               decoding="async"
               unoptimized
               className="hero-gif-image relative z-10 w-full max-w-[320px] object-contain sm:max-w-[420px] md:max-w-[520px] lg:max-w-[690px]"

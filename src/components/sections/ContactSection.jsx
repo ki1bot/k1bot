@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { MessageCircleMore, Share2 } from "lucide-react";
 
 import { PERSONAL_INFO } from "@/lib/constants";
@@ -52,14 +51,13 @@ const socialLinks = [
 
 function SocialIcon({ item, className = "h-full w-full" }) {
   return (
-    <Image
+    <img
       src={item.image}
       alt={item.title}
       width={44}
       height={44}
-      sizes="44px"
-      quality={75}
       loading="lazy"
+      decoding="async"
       fetchPriority="low"
       draggable={false}
       className={`${className} object-contain`}
@@ -68,7 +66,6 @@ function SocialIcon({ item, className = "h-full w-full" }) {
 }
 
 export function ContactSection({ comments = [] }) {
-  const sectionRef = useRef(null);
   const hubungiCardRef = useRef(null);
   const hubungiHeaderRef = useRef(null);
   const hubungiTopContentRef = useRef(null);
@@ -78,202 +75,132 @@ export function ContactSection({ comments = [] }) {
   const [commentsHeaderHeight, setCommentsHeaderHeight] = useState(null);
   const [commentsTopSpacerHeight, setCommentsTopSpacerHeight] = useState(0);
 
-  useEffect(() => {
-    const section = sectionRef.current;
+  useLayoutEffect(() => {
+    const hubungiCard = hubungiCardRef.current;
+    const hubungiHeader = hubungiHeaderRef.current;
+    const hubungiTopContent = hubungiTopContentRef.current;
+    const commentsTopContent = commentsTopContentRef.current;
 
-    if (!section) {
+    if (
+      !hubungiCard ||
+      !hubungiHeader ||
+      !hubungiTopContent ||
+      !commentsTopContent
+    ) {
       return;
     }
 
-    let hasStarted = false;
-    let cleanupLayoutSync = () => {};
+    let animationFrameId = null;
+    const timeoutIds = [];
 
-    function startLayoutSync() {
-      if (hasStarted) {
-        return;
+    function syncCommentsLayout() {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
 
-      hasStarted = true;
+      animationFrameId = requestAnimationFrame(() => {
+        const isDesktop = window.innerWidth >= 1024;
 
-      const hubungiCard = hubungiCardRef.current;
-      const hubungiHeader = hubungiHeaderRef.current;
-      const hubungiTopContent = hubungiTopContentRef.current;
-      const commentsTopContent = commentsTopContentRef.current;
-
-      if (
-        !hubungiCard ||
-        !hubungiHeader ||
-        !hubungiTopContent ||
-        !commentsTopContent
-      ) {
-        return;
-      }
-
-      let isActive = true;
-      let animationFrameId = null;
-      const timeoutIds = [];
-
-      function syncCommentsLayout() {
-        if (!isActive) {
+        if (!isDesktop) {
+          setCommentsCardHeight(null);
+          setCommentsHeaderHeight(null);
+          setCommentsTopSpacerHeight(0);
           return;
         }
 
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
+        const nextCardHeight = Math.ceil(hubungiCard.offsetHeight);
+        const nextHeaderHeight = Math.ceil(hubungiHeader.offsetHeight);
+        const hubungiTopHeight = Math.ceil(hubungiTopContent.offsetHeight);
+        const commentsTopHeight = Math.ceil(commentsTopContent.offsetHeight);
+        const nextSpacerHeight = Math.max(
+          0,
+          hubungiTopHeight - commentsTopHeight,
+        );
 
-        animationFrameId = requestAnimationFrame(() => {
-          animationFrameId = null;
-
-          if (!isActive) {
-            return;
+        setCommentsCardHeight((currentHeight) => {
+          if (
+            typeof currentHeight === "number" &&
+            Math.abs(currentHeight - nextCardHeight) <= 1
+          ) {
+            return currentHeight;
           }
 
-          const isDesktop = window.innerWidth >= 1024;
+          return nextCardHeight;
+        });
 
-          if (!isDesktop) {
-            setCommentsCardHeight(null);
-            setCommentsHeaderHeight(null);
-            setCommentsTopSpacerHeight(0);
-            return;
+        setCommentsHeaderHeight((currentHeight) => {
+          if (
+            typeof currentHeight === "number" &&
+            Math.abs(currentHeight - nextHeaderHeight) <= 1
+          ) {
+            return currentHeight;
           }
 
-          const nextCardHeight = Math.ceil(hubungiCard.offsetHeight);
-          const nextHeaderHeight = Math.ceil(hubungiHeader.offsetHeight);
-          const hubungiTopHeight = Math.ceil(hubungiTopContent.offsetHeight);
-          const commentsTopHeight = Math.ceil(commentsTopContent.offsetHeight);
-
-          const nextSpacerHeight = Math.max(
-            0,
-            hubungiTopHeight - commentsTopHeight,
-          );
-
-          setCommentsCardHeight((currentHeight) => {
-            if (
-              typeof currentHeight === "number" &&
-              Math.abs(currentHeight - nextCardHeight) <= 1
-            ) {
-              return currentHeight;
-            }
-
-            return nextCardHeight;
-          });
-
-          setCommentsHeaderHeight((currentHeight) => {
-            if (
-              typeof currentHeight === "number" &&
-              Math.abs(currentHeight - nextHeaderHeight) <= 1
-            ) {
-              return currentHeight;
-            }
-
-            return nextHeaderHeight;
-          });
-
-          setCommentsTopSpacerHeight((currentHeight) => {
-            if (Math.abs(currentHeight - nextSpacerHeight) <= 1) {
-              return currentHeight;
-            }
-
-            return nextSpacerHeight;
-          });
+          return nextHeaderHeight;
         });
-      }
 
-      function scheduleSync() {
-        if (!isActive) {
-          return;
-        }
+        setCommentsTopSpacerHeight((currentHeight) => {
+          if (Math.abs(currentHeight - nextSpacerHeight) <= 1) {
+            return currentHeight;
+          }
 
-        syncCommentsLayout();
-
-        [100, 350, 700].forEach((delay) => {
-          const timeoutId = window.setTimeout(syncCommentsLayout, delay);
-          timeoutIds.push(timeoutId);
+          return nextSpacerHeight;
         });
-      }
-
-      const resizeObserver = new ResizeObserver(scheduleSync);
-
-      resizeObserver.observe(hubungiCard);
-      resizeObserver.observe(hubungiHeader);
-      resizeObserver.observe(hubungiTopContent);
-      resizeObserver.observe(commentsTopContent);
-
-      const images = Array.from(hubungiCard.querySelectorAll("img"));
-
-      images.forEach((image) => {
-        if (!image.complete) {
-          image.addEventListener("load", scheduleSync);
-          image.addEventListener("error", scheduleSync);
-        }
       });
+    }
 
-      if (document.fonts?.ready) {
-        document.fonts.ready.then(() => {
-          if (isActive) {
-            scheduleSync();
-          }
-        });
+    function scheduleSync() {
+      syncCommentsLayout();
+
+      [100, 350, 700].forEach((delay) => {
+        const timeoutId = window.setTimeout(syncCommentsLayout, delay);
+        timeoutIds.push(timeoutId);
+      });
+    }
+
+    const resizeObserver = new ResizeObserver(scheduleSync);
+
+    resizeObserver.observe(hubungiCard);
+    resizeObserver.observe(hubungiHeader);
+    resizeObserver.observe(hubungiTopContent);
+    resizeObserver.observe(commentsTopContent);
+
+    const images = Array.from(hubungiCard.querySelectorAll("img"));
+
+    images.forEach((image) => {
+      if (!image.complete) {
+        image.addEventListener("load", scheduleSync);
+        image.addEventListener("error", scheduleSync);
       }
+    });
 
-      scheduleSync();
-
-      window.addEventListener("resize", scheduleSync);
-      window.addEventListener("load", scheduleSync);
-
-      cleanupLayoutSync = () => {
-        isActive = false;
-
-        resizeObserver.disconnect();
-
-        images.forEach((image) => {
-          image.removeEventListener("load", scheduleSync);
-          image.removeEventListener("error", scheduleSync);
-        });
-
-        window.removeEventListener("resize", scheduleSync);
-        window.removeEventListener("load", scheduleSync);
-
-        timeoutIds.forEach((timeoutId) => {
-          window.clearTimeout(timeoutId);
-        });
-
-        if (animationFrameId) {
-          cancelAnimationFrame(animationFrameId);
-        }
-      };
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(scheduleSync);
     }
 
-    if (!("IntersectionObserver" in window)) {
-      startLayoutSync();
+    scheduleSync();
 
-      return () => {
-        cleanupLayoutSync();
-      };
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) {
-          return;
-        }
-
-        observer.disconnect();
-        startLayoutSync();
-      },
-      {
-        root: null,
-        rootMargin: "2000px 0px",
-        threshold: 0,
-      },
-    );
-
-    observer.observe(section);
+    window.addEventListener("resize", scheduleSync);
+    window.addEventListener("load", scheduleSync);
 
     return () => {
-      observer.disconnect();
-      cleanupLayoutSync();
+      resizeObserver.disconnect();
+
+      images.forEach((image) => {
+        image.removeEventListener("load", scheduleSync);
+        image.removeEventListener("error", scheduleSync);
+      });
+
+      window.removeEventListener("resize", scheduleSync);
+      window.removeEventListener("load", scheduleSync);
+
+      timeoutIds.forEach((timeoutId) => {
+        window.clearTimeout(timeoutId);
+      });
+
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
   }, []);
 
@@ -304,11 +231,7 @@ export function ContactSection({ comments = [] }) {
       : undefined;
 
   return (
-    <section
-      ref={sectionRef}
-      id="contact"
-      className="border-t border-white/10 py-20 md:py-32"
-    >
+    <section id="contact" className="border-t border-white/10 py-20 md:py-32">
       <div className="mx-auto max-w-[1320px] px-4 sm:px-6 md:px-10">
         <RevealOnScroll className="mx-auto max-w-4xl text-center">
           <p className="mb-5 text-sm font-bold uppercase tracking-[0.35em] text-blue-100/70">
