@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import {
@@ -214,11 +215,14 @@ export default async function ProjectDetailPage({ searchParams }) {
                     rel="noreferrer"
                     className="video-hover-button inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-fuchsia-400/25 bg-fuchsia-500/10 px-6 text-sm font-bold text-fuchsia-100 shadow-xl shadow-blue-950/20 min-[430px]:w-auto sm:h-14 sm:min-w-32 sm:px-7"
                   >
-                    <img
+                    <Image
                       src={assetUrl("media/github.png")}
                       alt="GitHub"
+                      width={20}
+                      height={20}
+                      sizes="20px"
+                      quality={75}
                       loading="lazy"
-                      decoding="async"
                       className="size-5 rounded-full object-contain"
                     />
                     GitHub
@@ -269,14 +273,17 @@ export default async function ProjectDetailPage({ searchParams }) {
             <div className="space-y-5 lg:space-y-6 lg:pt-12">
               <div className="detail-reveal detail-delay-2 detail-image-card overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] p-2 shadow-2xl shadow-blue-950/30 backdrop-blur-xl">
                 {project.img ? (
-                  <img
-                    src={project.img}
-                    alt={projectTitle}
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                    className="aspect-[16/10] w-full rounded-xl object-cover object-top sm:aspect-video"
-                  />
+                  <div className="relative aspect-[16/10] w-full sm:aspect-video">
+                    <Image
+                      src={project.img}
+                      alt={projectTitle}
+                      fill
+                      sizes="(max-width: 639px) calc(100vw - 48px), (max-width: 1023px) calc(100vw - 96px), 560px"
+                      quality={75}
+                      preload
+                      className="rounded-xl object-cover object-top"
+                    />
+                  </div>
                 ) : (
                   <div className="flex aspect-[16/10] w-full items-center justify-center rounded-xl bg-slate-950/50 text-sm text-blue-100/55 sm:aspect-video">
                     No Image

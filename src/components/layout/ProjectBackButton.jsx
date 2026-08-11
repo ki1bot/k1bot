@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -51,10 +50,6 @@ function getValidReturnLocation() {
 
 export function ProjectBackButton() {
   const router = useRouter();
-
-  useEffect(() => {
-    router.prefetch(PORTFOLIO_FALLBACK_URL);
-  }, [router]);
 
   function prefetchPortfolio() {
     router.prefetch(PORTFOLIO_FALLBACK_URL);

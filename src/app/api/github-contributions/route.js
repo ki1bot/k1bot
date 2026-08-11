@@ -3,8 +3,14 @@ import { NextResponse } from "next/server";
 const GITHUB_USERNAME = "ki1bot";
 const GITHUB_CONTRIBUTIONS_URL = `https://github.com/users/${GITHUB_USERNAME}/contributions`;
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+const SUCCESS_CACHE_CONTROL =
+  "public, max-age=60, s-maxage=300, stale-while-revalidate=86400";
+
+const ERROR_CACHE_CONTROL =
+  "public, max-age=30, s-maxage=60, stale-while-revalidate=300";
+
+export const dynamic = "force-static";
+export const revalidate = 300;
 
 function parseContributionTotalFromHeading(html) {
   const match = html.match(
@@ -42,7 +48,9 @@ export async function GET() {
         "Accept-Language": "en-US,en;q=0.9",
         "User-Agent": "k1bot-portfolio",
       },
-      cache: "no-store",
+      next: {
+        revalidate: 300,
+      },
     });
 
     if (!response.ok) {
@@ -54,9 +62,7 @@ export async function GET() {
         {
           status: response.status,
           headers: {
-            "Cache-Control": "no-store, no-cache, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
+            "Cache-Control": ERROR_CACHE_CONTROL,
           },
         },
       );
@@ -77,9 +83,7 @@ export async function GET() {
         {
           status: 502,
           headers: {
-            "Cache-Control": "no-store, no-cache, must-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
+            "Cache-Control": ERROR_CACHE_CONTROL,
           },
         },
       );
@@ -93,9 +97,7 @@ export async function GET() {
       },
       {
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-          Pragma: "no-cache",
-          Expires: "0",
+          "Cache-Control": SUCCESS_CACHE_CONTROL,
         },
       },
     );
@@ -108,9 +110,7 @@ export async function GET() {
       {
         status: 500,
         headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-          Pragma: "no-cache",
-          Expires: "0",
+          "Cache-Control": ERROR_CACHE_CONTROL,
         },
       },
     );

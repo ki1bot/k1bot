@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Clock3, Pin } from "lucide-react";
 
 function formatCommentDate(dateString) {
@@ -29,18 +30,17 @@ export function CommentCard({ comment }) {
       )}
 
       <div className="flex items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
+        <div className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10">
           {comment.profile_image ? (
-            <img
+            <Image
               src={comment.profile_image}
               alt={comment.user_name || "Komentar pengguna"}
-              width={44}
-              height={44}
+              fill
+              sizes="44px"
+              quality={75}
               loading="lazy"
-              decoding="async"
-              fetchPriority="low"
               draggable={false}
-              className="h-full w-full object-cover"
+              className="object-cover"
             />
           ) : (
             <span className="text-sm font-semibold text-white">{initial}</span>

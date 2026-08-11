@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ExternalLink, FileText } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,20 @@ function getPdfPath(filePath) {
   return filePath;
 }
 
+function CertificateImage({ src, alt }) {
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 639px) calc(100vw - 48px), (max-width: 1279px) calc(50vw - 52px), 390px"
+      quality={75}
+      loading="lazy"
+      className="object-cover object-top transition duration-700 group-hover:scale-105"
+    />
+  );
+}
+
 export function CertificateCard({ certificate }) {
   const certificatePath = certificate.img;
   const certificateTitle = certificate.title || "Certificate";
@@ -66,15 +81,9 @@ export function CertificateCard({ certificate }) {
       {isPdf ? (
         <div>
           <a href={pdfPath} target="_blank" rel="noreferrer">
-            <div className="aspect-[4/3] overflow-hidden bg-slate-950/40">
+            <div className="relative aspect-[4/3] overflow-hidden bg-slate-950/40">
               {isImage && imagePath ? (
-                <img
-                  src={imagePath}
-                  alt={certificateTitle}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-105"
-                />
+                <CertificateImage src={imagePath} alt={certificateTitle} />
               ) : (
                 <div className="flex min-h-[260px] flex-col justify-between p-5 sm:min-h-[320px] sm:p-6">
                   <div>
@@ -115,15 +124,9 @@ export function CertificateCard({ certificate }) {
       ) : (
         <div>
           <a href={pdfPath} target="_blank" rel="noreferrer">
-            <div className="aspect-[4/3] overflow-hidden bg-slate-950/40">
+            <div className="relative aspect-[4/3] overflow-hidden bg-slate-950/40">
               {isImage && imagePath ? (
-                <img
-                  src={imagePath}
-                  alt={certificateTitle}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover object-top transition duration-700 group-hover:scale-105"
-                />
+                <CertificateImage src={imagePath} alt={certificateTitle} />
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-blue-100/60">
                   No Certificate Image
