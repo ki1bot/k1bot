@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Mail, Sparkles } from "lucide-react";
+import { ExternalLink, Mail, ChartNoAxesCombined } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { PERSONAL_INFO } from "@/lib/constants";
@@ -277,7 +277,7 @@ export function HeroSection() {
       <div className="mx-auto grid min-h-screen max-w-[1320px] items-center gap-10 px-4 pb-20 pt-28 sm:px-6 sm:pt-32 md:px-10 md:pb-28 md:pt-44 lg:grid-cols-[0.9fr_1.1fr] lg:gap-28 lg:pt-56 xl:gap-48">
         <RevealOnScroll className="order-1 opacity-100" y={28} scale={0.99}>
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-xs font-medium text-violet-200 shadow-lg shadow-violet-500/10 backdrop-blur-xl sm:px-4 sm:text-sm">
-            <Sparkles className="size-4 text-blue-300" />
+            <ChartNoAxesCombined className="size-4 text-blue-300" />
             Ready to Innovate
           </div>
 
