@@ -1,7 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
+
+import {
+  CodeXmlIcon,
+  GithubIcon,
+  UserIcon,
+} from "@/components/icons/TablerIcons";
 
 const MOBILE_EXIT_DELAY_MS = 1200;
 const MOBILE_REMOVE_DELAY_MS = 1700;
@@ -12,19 +17,19 @@ const DESKTOP_REMOVE_DELAY_MS = 3000;
 const loadingIcons = [
   {
     label: "HTML",
-    src: "/img/screen/html.png",
+    Icon: CodeXmlIcon,
     desktopDelay: "0ms",
     mobileDelay: "0ms",
   },
   {
     label: "Profile",
-    src: "/img/screen/profile.png",
+    Icon: UserIcon,
     desktopDelay: "140ms",
     mobileDelay: "90ms",
   },
   {
     label: "Github",
-    src: "/img/screen/github.png",
+    Icon: GithubIcon,
     desktopDelay: "280ms",
     mobileDelay: "180ms",
   },
@@ -78,25 +83,19 @@ export function LoadingScreen() {
 
       <div className="portfolio-loader-content">
         <div className="portfolio-loader-icons" aria-hidden="true">
-          {loadingIcons.map((icon) => (
+          {loadingIcons.map(({ label, Icon, desktopDelay, mobileDelay }) => (
             <div
-              key={icon.label}
+              key={label}
               className="portfolio-loader-icon"
               style={{
-                "--loader-icon-delay": icon.desktopDelay,
-                "--loader-icon-mobile-delay": icon.mobileDelay,
+                "--loader-icon-delay": desktopDelay,
+                "--loader-icon-mobile-delay": mobileDelay,
               }}
             >
-              <Image
-                src={icon.src}
-                alt=""
-                width={48}
-                height={48}
-                sizes="(max-width: 639px) 36px, 40px"
-                quality={75}
-                priority
+              <Icon
                 className="portfolio-loader-image-icon"
-                draggable={false}
+                stroke={1.8}
+                aria-hidden="true"
               />
             </div>
           ))}

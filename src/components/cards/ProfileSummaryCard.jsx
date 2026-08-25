@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, FileText, FolderKanban, MapPin } from "lucide-react";
 
+import { GithubIcon } from "@/components/icons/TablerIcons";
 import { PERSONAL_INFO, TECH_STACK } from "@/lib/constants";
-import { assetUrl } from "@/lib/supabase-storage";
 
 const CV_DRIVE_URL =
   "https://drive.google.com/drive/folders/1SmhgvKkpRICHDnnvEH3dTHS-72bmsp16?usp=sharing";
@@ -13,7 +13,6 @@ const CV_DRIVE_URL =
 const GITHUB_USERNAME = "ki1bot";
 const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
 const GITHUB_CONTRIBUTIONS_URL = `https://ghchart.rshah.org/8b5cf6/${GITHUB_USERNAME}`;
-const GITHUB_ICON = assetUrl("media/github.png");
 
 const STATIC_GITHUB_CONTRIBUTIONS = 417;
 const GITHUB_REFRESH_INTERVAL = 300000;
@@ -575,16 +574,13 @@ export function ProfileSummaryCard({
                 <div className="overflow-hidden rounded-[calc(1.4rem-1px)] bg-[#1a1d39]/95 sm:rounded-[calc(1.8rem-1px)]">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-4 sm:px-5 sm:py-5">
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl border border-violet-300/15 bg-violet-500/10 shadow-lg shadow-violet-950/30 sm:size-11">
+                      <div className="relative flex size-10 shrink-0 items-center justify-center rounded-xl border border-violet-300/15 bg-violet-500/10 text-violet-100 shadow-lg shadow-violet-950/30 sm:size-11">
                         <div className="absolute inset-0 rounded-xl bg-violet-400/10 blur-md" />
 
-                        <Image
-                          src={GITHUB_ICON}
-                          alt="GitHub"
-                          width={22}
-                          height={22}
-                          sizes="22px"
-                          className="relative size-5 object-contain sm:size-[22px]"
+                        <GithubIcon
+                          className="relative size-5 sm:size-[22px]"
+                          stroke={1.8}
+                          aria-hidden="true"
                         />
                       </div>
 

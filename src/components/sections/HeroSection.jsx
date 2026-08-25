@@ -2,9 +2,14 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, Mail, ChartNoAxesCombined } from "lucide-react";
+import { ChartNoAxesCombined, ExternalLink, Mail } from "lucide-react";
 
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
+import {
+  GithubIcon,
+  InstagramIcon,
+  Linkedin01Icon,
+} from "@/components/icons/TablerIcons";
 import { PERSONAL_INFO } from "@/lib/constants";
 import { assetUrl } from "@/lib/supabase-storage";
 
@@ -26,17 +31,17 @@ const heroSocials = [
   {
     title: "GitHub",
     href: PERSONAL_INFO.github,
-    image: assetUrl("media/github.png"),
+    Icon: GithubIcon,
   },
   {
     title: "LinkedIn",
     href: PERSONAL_INFO.linkedin,
-    image: assetUrl("media/linkedin.png"),
+    Icon: Linkedin01Icon,
   },
   {
     title: "Instagram",
     href: PERSONAL_INFO.instagram,
-    image: assetUrl("media/instagram.png"),
+    Icon: InstagramIcon,
   },
 ];
 
@@ -330,24 +335,19 @@ export function HeroSection() {
           </div>
 
           <div className="mt-10 flex items-center gap-4 sm:gap-6 md:mt-12 md:gap-7">
-            {heroSocials.map((social) => (
+            {heroSocials.map(({ title, href, Icon }) => (
               <a
-                key={social.title}
-                href={social.href}
+                key={title}
+                href={href}
                 target="_blank"
                 rel="noreferrer"
-                aria-label={social.title}
-                className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] p-3 shadow-lg shadow-violet-950/20 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-300/25 hover:bg-violet-500/10 sm:size-12"
+                aria-label={title}
+                className="flex size-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-violet-100 shadow-lg shadow-violet-950/20 backdrop-blur-xl transition hover:-translate-y-1 hover:border-violet-300/25 hover:bg-violet-500/10 hover:text-white sm:size-12"
               >
-                <Image
-                  src={social.image}
-                  alt={social.title}
-                  width={32}
-                  height={32}
-                  sizes="32px"
-                  loading="eager"
-                  className="h-full w-full object-contain"
-                  draggable={false}
+                <Icon
+                  className="h-full w-full"
+                  stroke={1.8}
+                  aria-hidden="true"
                 />
               </a>
             ))}

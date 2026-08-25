@@ -3,66 +3,63 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { MessageCircleMore, Share2 } from "lucide-react";
 
-import { PERSONAL_INFO } from "@/lib/constants";
-import { assetUrl } from "@/lib/supabase-storage";
-import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
-import { ContactMessageForm } from "@/components/forms/ContactMessageForm";
-import { CommentForm } from "@/components/forms/CommentForm";
 import { CommentCard } from "@/components/cards/CommentCard";
+import { CommentForm } from "@/components/forms/CommentForm";
+import { ContactMessageForm } from "@/components/forms/ContactMessageForm";
+import {
+  GithubIcon,
+  InstagramIcon,
+  Linkedin01Icon,
+  SpotifyIcon,
+  TiktokIcon,
+  YoutubeIcon,
+} from "@/components/icons/TablerIcons";
+import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
+import { PERSONAL_INFO } from "@/lib/constants";
 
 const socialLinks = [
   {
     title: "LinkedIn",
     subtitle: "Rifqi Susanto",
     href: PERSONAL_INFO.linkedin,
-    image: assetUrl("media/linkedin.png"),
+    Icon: Linkedin01Icon,
   },
   {
     title: "GitHub",
     subtitle: "@ki1bot",
     href: PERSONAL_INFO.github,
-    image: assetUrl("media/github.png"),
+    Icon: GithubIcon,
   },
   {
     title: "Instagram",
     subtitle: "@ki1bot_",
     href: PERSONAL_INFO.instagram,
-    image: assetUrl("media/instagram.png"),
+    Icon: InstagramIcon,
   },
   {
     title: "YouTube",
     subtitle: "@kibot7659",
     href: PERSONAL_INFO.youtube,
-    image: assetUrl("media/youtube.png"),
+    Icon: YoutubeIcon,
   },
   {
     title: "Spotify",
     subtitle: "kibot",
     href: PERSONAL_INFO.spotify,
-    image: assetUrl("media/Spotify.png"),
+    Icon: SpotifyIcon,
   },
   {
     title: "TikTok",
     subtitle: "@kiibott_",
     href: PERSONAL_INFO.tiktok,
-    image: assetUrl("media/tiktok.png"),
+    Icon: TiktokIcon,
   },
 ];
 
 function SocialIcon({ item, className = "h-full w-full" }) {
-  return (
-    <img
-      src={item.image}
-      alt={item.title}
-      width={44}
-      height={44}
-      loading="lazy"
-      decoding="async"
-      fetchPriority="low"
-      draggable={false}
-      className={`${className} object-contain`}
-    />
-  );
+  const Icon = item.Icon;
+
+  return <Icon className={className} stroke={1.8} aria-hidden="true" />;
 }
 
 export function ContactSection({ comments = [] }) {
@@ -299,7 +296,7 @@ export function ContactSection({ comments = [] }) {
                       className="rounded-2xl border border-white/10 bg-white/5 p-3 transition hover:-translate-y-1 hover:border-violet-300/20 hover:bg-white/10 lg:p-4"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 p-2.5 lg:size-11">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/12 p-2.5 text-violet-100 lg:size-11">
                           <SocialIcon item={item} />
                         </div>
 
