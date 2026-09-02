@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Loader2, Mail, MessageSquareText, Send, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,11 +20,21 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function createSubmission() {
+  return {
+    id: crypto.randomUUID(),
+    submittedAt: new Date().toISOString(),
+  };
+}
+
 export function ContactMessageForm() {
   const [form, setForm] = useState(initialForm);
-  const [feedback, setFeedback] = useState("");
-  const [feedbackType, setFeedbackType] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successToast, setSuccessToast] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const successTimerRef = useRef(null);
+  const submissionRef = useRef(null);
 
   const isFormValid = useMemo(() => {
     const name = form.name.trim();
@@ -41,6 +52,27 @@ export function ContactMessageForm() {
     );
   }, [form]);
 
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        window.clearTimeout(successTimerRef.current);
+      }
+    };
+  }, []);
+
+  function showSuccessToast(message) {
+    if (successTimerRef.current) {
+      window.clearTimeout(successTimerRef.current);
+    }
+
+    setSuccessToast(message);
+
+    successTimerRef.current = window.setTimeout(() => {
+      setSuccessToast("");
+      successTimerRef.current = null;
+    }, 3000);
+  }
+
   function handleChange(event) {
     const { name, value } = event.target;
 
@@ -49,10 +81,8 @@ export function ContactMessageForm() {
       [name]: value,
     }));
 
-    if (feedback) {
-      setFeedback("");
-      setFeedbackType("");
-    }
+    setErrorMessage("");
+    submissionRef.current = null;
   }
 
   async function handleSubmit(event) {
@@ -63,38 +93,38 @@ export function ContactMessageForm() {
     const message = form.message.trim();
     const website = form.website.trim();
 
-    setFeedback("");
-    setFeedbackType("");
+    setErrorMessage("");
 
     if (!name || !email || !message) {
-      setFeedback("Nama, email, dan pesan wajib diisi.");
-      setFeedbackType("error");
+      setErrorMessage("Nama, email, dan pesan wajib diisi.");
       return;
     }
 
     if (!isValidEmail(email)) {
-      setFeedback("Format email tidak valid.");
-      setFeedbackType("error");
+      setErrorMessage("Format email tidak valid.");
       return;
     }
 
     if (name.length > 100) {
-      setFeedback("Nama terlalu panjang. Maksimal 100 karakter.");
-      setFeedbackType("error");
+      setErrorMessage("Nama terlalu panjang. Maksimal 100 karakter.");
       return;
     }
 
     if (email.length > 254) {
-      setFeedback("Email terlalu panjang. Maksimal 254 karakter.");
-      setFeedbackType("error");
+      setErrorMessage("Email terlalu panjang. Maksimal 254 karakter.");
       return;
     }
 
     if (message.length > 3000) {
-      setFeedback("Pesan terlalu panjang. Maksimal 3000 karakter.");
-      setFeedbackType("error");
+      setErrorMessage("Pesan terlalu panjang. Maksimal 3000 karakter.");
       return;
     }
+
+    if (!submissionRef.current) {
+      submissionRef.current = createSubmission();
+    }
+
+    const submission = submissionRef.current;
 
     setIsSubmitting(true);
 
@@ -109,6 +139,8 @@ export function ContactMessageForm() {
           email,
           message,
           website,
+          submissionId: submission.id,
+          submittedAt: submission.submittedAt,
         }),
       });
 
@@ -120,112 +152,123 @@ export function ContactMessageForm() {
         );
       }
 
-      setFeedback(result?.message || "Pesan berhasil dikirim.");
-      setFeedbackType("success");
       setForm(initialForm);
+      submissionRef.current = null;
+
+      showSuccessToast(result?.message || "Pesan berhasil dikirim.");
     } catch (error) {
-      setFeedback(
+      setErrorMessage(
         error instanceof Error
           ? error.message
           : "Pesan gagal dikirim. Silakan coba lagi nanti.",
       );
-      setFeedbackType("error");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="relative space-y-4">
-      <input
-        type="text"
-        name="website"
-        value={form.website}
-        onChange={handleChange}
-        autoComplete="off"
-        tabIndex={-1}
-        aria-label="Website"
-        className="pointer-events-none absolute -left-[9999px] h-px w-px opacity-0"
-      />
+    <>
+      {successToast && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              role="status"
+              aria-live="polite"
+              className="pointer-events-none fixed left-1/2 top-5 z-[9999] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-xl border border-emerald-300/20 bg-[#142238]/95 px-5 py-3.5 text-center text-sm font-medium text-emerald-100 shadow-xl backdrop-blur-md"
+            >
+              {successToast}
+            </div>,
+            document.body,
+          )
+        : null}
 
-      <div className="relative">
-        <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
-
+      <form onSubmit={handleSubmit} className="relative space-y-4">
         <input
           type="text"
-          name="name"
-          value={form.name}
+          name="website"
+          value={form.website}
           onChange={handleChange}
-          placeholder="Nama Anda"
-          autoComplete="name"
-          maxLength={100}
-          required
-          className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
+          autoComplete="off"
+          tabIndex={-1}
+          aria-label="Website"
+          className="pointer-events-none absolute -left-[9999px] h-px w-px opacity-0"
         />
-      </div>
 
-      <div className="relative">
-        <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
+        <div className="relative">
+          <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
 
-        <input
-          type="email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          placeholder="Email Anda"
-          autoComplete="email"
-          maxLength={254}
-          required
-          className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
-        />
-      </div>
-
-      <div className="relative">
-        <MessageSquareText className="pointer-events-none absolute left-4 top-4 z-10 size-4 text-blue-100/40" />
-
-        <textarea
-          name="message"
-          value={form.message}
-          onChange={handleChange}
-          placeholder="Pesan Anda"
-          rows={5}
-          maxLength={3000}
-          required
-          className={`${fieldClassName} min-h-[120px] resize-none py-4 pl-11 pr-4`}
-        />
-      </div>
-
-      {feedback ? (
-        <div
-          role="status"
-          aria-live="polite"
-          className={`rounded-xl border px-4 py-3 text-sm leading-6 ${
-            feedbackType === "success"
-              ? "border-emerald-300/20 bg-emerald-500/10 text-emerald-100"
-              : "border-red-300/20 bg-red-500/10 text-red-100"
-          }`}
-        >
-          {feedback}
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Nama Anda"
+            autoComplete="name"
+            maxLength={100}
+            required
+            className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
+          />
         </div>
-      ) : null}
 
-      <Button
-        type="submit"
-        disabled={isSubmitting || !isFormValid}
-        className="h-12 w-full rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-xl shadow-violet-500/20 transition hover:-translate-y-0.5 hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:h-14"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="size-4 animate-spin" />
-            Mengirim...
-          </>
-        ) : (
-          <>
-            <Send className="size-4" />
-            Kirim Pesan
-          </>
-        )}
-      </Button>
-    </form>
+        <div className="relative">
+          <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
+
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            placeholder="Email Anda"
+            autoComplete="email"
+            maxLength={254}
+            required
+            className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
+          />
+        </div>
+
+        <div className="relative">
+          <MessageSquareText className="pointer-events-none absolute left-4 top-4 z-10 size-4 text-blue-100/40" />
+
+          <textarea
+            name="message"
+            value={form.message}
+            onChange={handleChange}
+            placeholder="Pesan Anda"
+            rows={5}
+            maxLength={3000}
+            required
+            className={`${fieldClassName} min-h-[120px] resize-none py-4 pl-11 pr-4`}
+          />
+        </div>
+
+        {errorMessage ? (
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="rounded-xl border border-red-300/20 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-100"
+          >
+            {errorMessage}
+          </div>
+        ) : null}
+
+        <Button
+          type="submit"
+          disabled={isSubmitting || !isFormValid}
+          className="h-12 w-full rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-sm font-bold text-white shadow-xl shadow-violet-500/20 transition hover:-translate-y-0.5 hover:shadow-violet-500/30 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:h-14"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" />
+              Mengirim...
+            </>
+          ) : (
+            <>
+              <Send className="size-4" />
+              Kirim Pesan
+            </>
+          )}
+        </Button>
+      </form>
+    </>
   );
 }

@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
+const MAX_SUBMISSION_AGE_MS = 24 * 60 * 60 * 1000;
 
 const rateLimitStore = globalThis.__portfolioContactRateLimitStore || new Map();
 
@@ -14,6 +15,12 @@ globalThis.__portfolioContactRateLimitStore = rateLimitStore;
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function isValidSubmissionId(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 }
 
 function cleanEmailHeader(value) {
@@ -27,11 +34,11 @@ function cleanEmailHeader(value) {
 function getClientIp(request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
 
-  if (!forwardedFor) {
-    return "";
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "";
   }
 
-  return forwardedFor.split(",")[0]?.trim() || "";
+  return request.headers.get("x-real-ip")?.trim() || "";
 }
 
 function checkRateLimit(ip) {
@@ -94,22 +101,52 @@ function jsonError(message, status, headers = {}) {
   );
 }
 
-function formatReceivedAt() {
+function parseSubmittedAt(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const difference = Math.abs(Date.now() - date.getTime());
+
+  if (difference > MAX_SUBMISSION_AGE_MS) {
+    return null;
+  }
+
+  return date;
+}
+
+function formatReceivedAt(date) {
   return new Intl.DateTimeFormat("id-ID", {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Asia/Jakarta",
-  }).format(new Date());
+  }).format(date);
 }
 
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const contentType = request.headers.get("content-type") || "";
+
+    if (!contentType.includes("application/json")) {
+      return jsonError("Format permintaan tidak didukung.", 415);
+    }
+
+    let body;
+
+    try {
+      body = await request.json();
+    } catch {
+      return jsonError("Data permintaan tidak valid.", 400);
+    }
 
     const name = String(body.name || "").trim();
     const email = String(body.email || "").trim();
     const message = String(body.message || "").trim();
     const website = String(body.website || "").trim();
+    const submissionId = String(body.submissionId || "").trim();
+    const submittedAt = String(body.submittedAt || "").trim();
 
     if (website) {
       return NextResponse.json(
@@ -118,19 +155,6 @@ export async function POST(request) {
         },
         {
           status: 200,
-        },
-      );
-    }
-
-    const clientIp = getClientIp(request);
-    const rateLimit = checkRateLimit(clientIp);
-
-    if (!rateLimit.allowed) {
-      return jsonError(
-        "Terlalu banyak pesan dikirim. Silakan coba lagi beberapa saat.",
-        429,
-        {
-          "Retry-After": String(rateLimit.retryAfter),
         },
       );
     }
@@ -155,6 +179,29 @@ export async function POST(request) {
       return jsonError("Pesan terlalu panjang. Maksimal 3000 karakter.", 400);
     }
 
+    if (!isValidSubmissionId(submissionId)) {
+      return jsonError("ID pengiriman tidak valid.", 400);
+    }
+
+    const submissionDate = parseSubmittedAt(submittedAt);
+
+    if (!submissionDate) {
+      return jsonError("Waktu pengiriman tidak valid.", 400);
+    }
+
+    const clientIp = getClientIp(request);
+    const rateLimit = checkRateLimit(clientIp);
+
+    if (!rateLimit.allowed) {
+      return jsonError(
+        "Terlalu banyak pesan dikirim. Silakan coba lagi beberapa saat.",
+        429,
+        {
+          "Retry-After": String(rateLimit.retryAfter),
+        },
+      );
+    }
+
     const resendApiKey = process.env.RESEND_API_KEY?.trim();
 
     const receiverEmail = process.env.CONTACT_RECEIVER_EMAIL?.trim();
@@ -174,7 +221,8 @@ export async function POST(request) {
     }
 
     const visitorName = cleanEmailHeader(name);
-    const receivedAt = formatReceivedAt();
+
+    const receivedAt = formatReceivedAt(submissionDate);
 
     const contactEmail = buildContactEmail({
       name,
@@ -188,6 +236,7 @@ export async function POST(request) {
       headers: {
         Authorization: `Bearer ${resendApiKey}`,
         "Content-Type": "application/json",
+        "Idempotency-Key": `portfolio-contact/${submissionId}`,
       },
       body: JSON.stringify({
         from: `${senderName} <${senderEmail}>`,
@@ -202,9 +251,10 @@ export async function POST(request) {
 
     const resendResult = await resendResponse.json().catch(() => null);
 
-    if (!resendResponse.ok) {
+    if (!resendResponse.ok || !resendResult?.id) {
       console.error("RESEND_EMAIL_ERROR:", {
         status: resendResponse.status,
+        type: resendResult?.name || resendResult?.type || null,
         message:
           resendResult?.message ||
           resendResult?.error ||
@@ -226,7 +276,7 @@ export async function POST(request) {
       },
     );
   } catch (error) {
-    if (error?.name === "TimeoutError") {
+    if (error?.name === "TimeoutError" || error?.name === "AbortError") {
       console.error("CONTACT_EMAIL_TIMEOUT");
 
       return jsonError(
