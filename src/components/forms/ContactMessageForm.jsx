@@ -9,6 +9,7 @@ const initialForm = {
   name: "",
   email: "",
   message: "",
+  website: "",
 };
 
 const fieldClassName =
@@ -29,7 +30,15 @@ export function ContactMessageForm() {
     const email = form.email.trim();
     const message = form.message.trim();
 
-    return Boolean(name && email && message && isValidEmail(email));
+    return Boolean(
+      name &&
+      email &&
+      message &&
+      name.length <= 100 &&
+      email.length <= 254 &&
+      message.length <= 3000 &&
+      isValidEmail(email),
+    );
   }, [form]);
 
   function handleChange(event) {
@@ -52,6 +61,7 @@ export function ContactMessageForm() {
     const name = form.name.trim();
     const email = form.email.trim();
     const message = form.message.trim();
+    const website = form.website.trim();
 
     setFeedback("");
     setFeedbackType("");
@@ -68,6 +78,24 @@ export function ContactMessageForm() {
       return;
     }
 
+    if (name.length > 100) {
+      setFeedback("Nama terlalu panjang. Maksimal 100 karakter.");
+      setFeedbackType("error");
+      return;
+    }
+
+    if (email.length > 254) {
+      setFeedback("Email terlalu panjang. Maksimal 254 karakter.");
+      setFeedbackType("error");
+      return;
+    }
+
+    if (message.length > 3000) {
+      setFeedback("Pesan terlalu panjang. Maksimal 3000 karakter.");
+      setFeedbackType("error");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -80,6 +108,7 @@ export function ContactMessageForm() {
           name,
           email,
           message,
+          website,
         }),
       });
 
@@ -87,15 +116,19 @@ export function ContactMessageForm() {
 
       if (!response.ok) {
         throw new Error(
-          result?.message || "Pesan gagal dikirim. Coba lagi nanti.",
+          result?.message || "Pesan gagal dikirim. Silakan coba lagi nanti.",
         );
       }
 
-      setFeedback(result?.message || "Pesan berhasil dikirim ke Gmail.");
+      setFeedback(result?.message || "Pesan berhasil dikirim.");
       setFeedbackType("success");
       setForm(initialForm);
     } catch (error) {
-      setFeedback(error.message || "Pesan gagal dikirim. Coba lagi nanti.");
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : "Pesan gagal dikirim. Silakan coba lagi nanti.",
+      );
       setFeedbackType("error");
     } finally {
       setIsSubmitting(false);
@@ -103,7 +136,18 @@ export function ContactMessageForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="relative space-y-4">
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={handleChange}
+        autoComplete="off"
+        tabIndex={-1}
+        aria-label="Website"
+        className="pointer-events-none absolute -left-[9999px] h-px w-px opacity-0"
+      />
+
       <div className="relative">
         <User className="pointer-events-none absolute left-4 top-1/2 z-10 size-4 -translate-y-1/2 text-blue-100/40" />
 
@@ -114,6 +158,8 @@ export function ContactMessageForm() {
           onChange={handleChange}
           placeholder="Nama Anda"
           autoComplete="name"
+          maxLength={100}
+          required
           className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
         />
       </div>
@@ -128,6 +174,8 @@ export function ContactMessageForm() {
           onChange={handleChange}
           placeholder="Email Anda"
           autoComplete="email"
+          maxLength={254}
+          required
           className={`${fieldClassName} h-12 pl-11 pr-4 sm:h-14`}
         />
       </div>
@@ -141,12 +189,16 @@ export function ContactMessageForm() {
           onChange={handleChange}
           placeholder="Pesan Anda"
           rows={5}
+          maxLength={3000}
+          required
           className={`${fieldClassName} min-h-[120px] resize-none py-4 pl-11 pr-4`}
         />
       </div>
 
       {feedback ? (
         <div
+          role="status"
+          aria-live="polite"
           className={`rounded-xl border px-4 py-3 text-sm leading-6 ${
             feedbackType === "success"
               ? "border-emerald-300/20 bg-emerald-500/10 text-emerald-100"
