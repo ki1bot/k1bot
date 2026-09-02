@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { buildContactEmail } from "@/lib/email/contact-email-template";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -12,15 +14,6 @@ globalThis.__portfolioContactRateLimitStore = rateLimitStore;
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 function cleanEmailHeader(value) {
@@ -181,14 +174,14 @@ export async function POST(request) {
     }
 
     const visitorName = cleanEmailHeader(name);
+    const receivedAt = formatReceivedAt();
 
-    const safeName = escapeHtml(name);
-    const safeEmail = escapeHtml(email);
-    const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
-
-    const receivedAt = escapeHtml(formatReceivedAt());
-
-    const replyMailto = `mailto:${encodeURIComponent(email)}`;
+    const contactEmail = buildContactEmail({
+      name,
+      email,
+      message,
+      receivedAt,
+    });
 
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -201,275 +194,8 @@ export async function POST(request) {
         to: [receiverEmail],
         reply_to: email,
         subject: `Pesan baru dari ${visitorName}`,
-        text: `Nama: ${name}\nEmail: ${email}\nDiterima: ${receivedAt}\n\nPesan:\n${message}`,
-        html: `
-<!DOCTYPE html>
-<html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>Pesan Baru</title>
-  </head>
-
-  <body
-    style="
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #222222;
-    "
-  >
-    <table
-      role="presentation"
-      width="100%"
-      cellpadding="0"
-      cellspacing="0"
-      border="0"
-      style="
-        width: 100%;
-        background-color: #f5f5f5;
-      "
-    >
-      <tr>
-        <td
-          align="center"
-          style="
-            padding: 32px 16px;
-          "
-        >
-          <table
-            role="presentation"
-            width="100%"
-            cellpadding="0"
-            cellspacing="0"
-            border="0"
-            style="
-              width: 100%;
-              max-width: 600px;
-              background-color: #ffffff;
-              border: 1px solid #e5e5e5;
-              border-radius: 10px;
-            "
-          >
-            <tr>
-              <td
-                style="
-                  padding: 28px 32px 20px;
-                "
-              >
-                <div
-                  style="
-                    margin-bottom: 6px;
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: #666666;
-                  "
-                >
-                  Rifqi Portfolio
-                </div>
-
-                <h1
-                  style="
-                    margin: 0;
-                    font-size: 24px;
-                    line-height: 1.4;
-                    font-weight: 700;
-                    color: #111111;
-                  "
-                >
-                  Pesan baru dari ${safeName}
-                </h1>
-
-                <div
-                  style="
-                    margin-top: 8px;
-                    font-size: 13px;
-                    line-height: 1.5;
-                    color: #888888;
-                  "
-                >
-                  ${receivedAt} WIB
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style="
-                  padding: 0 32px;
-                "
-              >
-                <div
-                  style="
-                    height: 1px;
-                    background-color: #eeeeee;
-                  "
-                ></div>
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style="
-                  padding: 24px 32px 8px;
-                "
-              >
-                <table
-                  role="presentation"
-                  width="100%"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                >
-                  <tr>
-                    <td
-                      style="
-                        width: 80px;
-                        padding: 0 0 14px;
-                        vertical-align: top;
-                        font-size: 14px;
-                        color: #777777;
-                      "
-                    >
-                      Nama
-                    </td>
-
-                    <td
-                      style="
-                        padding: 0 0 14px;
-                        font-size: 14px;
-                        font-weight: 600;
-                        color: #222222;
-                      "
-                    >
-                      ${safeName}
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td
-                      style="
-                        width: 80px;
-                        padding: 0 0 14px;
-                        vertical-align: top;
-                        font-size: 14px;
-                        color: #777777;
-                      "
-                    >
-                      Email
-                    </td>
-
-                    <td
-                      style="
-                        padding: 0 0 14px;
-                        font-size: 14px;
-                      "
-                    >
-                      <a
-                        href="mailto:${safeEmail}"
-                        style="
-                          color: #2563eb;
-                          text-decoration: none;
-                        "
-                      >
-                        ${safeEmail}
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style="
-                  padding: 8px 32px 24px;
-                "
-              >
-                <div
-                  style="
-                    margin-bottom: 10px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: #222222;
-                  "
-                >
-                  Pesan
-                </div>
-
-                <div
-                  style="
-                    padding: 16px;
-                    background-color: #f7f7f7;
-                    border-radius: 6px;
-                    font-size: 14px;
-                    line-height: 1.7;
-                    color: #333333;
-                    word-break: break-word;
-                  "
-                >
-                  ${safeMessage}
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style="
-                  padding: 0 32px 28px;
-                "
-              >
-                <a
-                  href="${replyMailto}"
-                  style="
-                    display: inline-block;
-                    padding: 11px 18px;
-                    background-color: #111111;
-                    border-radius: 6px;
-                    color: #ffffff;
-                    font-size: 14px;
-                    font-weight: 600;
-                    text-decoration: none;
-                  "
-                >
-                  Balas pesan
-                </a>
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style="
-                  padding: 18px 32px;
-                  border-top: 1px solid #eeeeee;
-                  font-size: 12px;
-                  line-height: 1.6;
-                  color: #999999;
-                "
-              >
-                Pesan ini dikirim melalui form kontak di
-                <a
-                  href="https://www.rifqii.com"
-                  style="
-                    color: #666666;
-                    text-decoration: underline;
-                  "
-                >
-                  rifqii.com
-                </a>.
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
-          `,
+        text: contactEmail.text,
+        html: contactEmail.html,
       }),
       signal: AbortSignal.timeout(10000),
     });
