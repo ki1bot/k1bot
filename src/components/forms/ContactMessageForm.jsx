@@ -6,6 +6,9 @@ import { Loader2, Mail, MessageSquareText, Send, User } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
+const TOAST_DURATION = 3000;
+const TOAST_EXIT_DURATION = 250;
+
 const fieldClassName =
   "w-full rounded-xl border border-white/15 bg-white/[0.07] text-sm font-medium text-white caret-white outline-none transition placeholder:text-blue-100/40 focus:border-violet-300/40 focus:bg-white/[0.1] autofill:border-white/15 autofill:shadow-[0_0_0_1000px_rgba(255,255,255,0.07)_inset] autofill:[-webkit-text-fill-color:white] autofill:caret-white autofill:transition-[background-color] autofill:duration-[999999s]";
 
@@ -28,9 +31,13 @@ function getFormValue(formData, name) {
 export function ContactMessageForm() {
   const [toast, setToast] = useState(null);
 
+  const [isToastVisible, setIsToastVisible] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toastTimerRef = useRef(null);
+  const toastExitTimerRef = useRef(null);
+  const toastAnimationFrameRef = useRef(null);
   const submissionRef = useRef(null);
 
   useEffect(() => {
@@ -38,27 +45,75 @@ export function ContactMessageForm() {
       if (toastTimerRef.current) {
         window.clearTimeout(toastTimerRef.current);
       }
+
+      if (toastExitTimerRef.current) {
+        window.clearTimeout(toastExitTimerRef.current);
+      }
+
+      if (toastAnimationFrameRef.current) {
+        window.cancelAnimationFrame(toastAnimationFrameRef.current);
+      }
     };
   }, []);
 
-  function showToast(message, type = "success") {
+  function clearToastTimers() {
     if (toastTimerRef.current) {
       window.clearTimeout(toastTimerRef.current);
+
+      toastTimerRef.current = null;
     }
+
+    if (toastExitTimerRef.current) {
+      window.clearTimeout(toastExitTimerRef.current);
+
+      toastExitTimerRef.current = null;
+    }
+
+    if (toastAnimationFrameRef.current) {
+      window.cancelAnimationFrame(toastAnimationFrameRef.current);
+
+      toastAnimationFrameRef.current = null;
+    }
+  }
+
+  function hideToast() {
+    setIsToastVisible(false);
+
+    toastExitTimerRef.current = window.setTimeout(() => {
+      setToast(null);
+      toastExitTimerRef.current = null;
+    }, TOAST_EXIT_DURATION);
+  }
+
+  function showToast(message, type = "success") {
+    clearToastTimers();
 
     setToast({
       message,
       type,
     });
 
+    setIsToastVisible(false);
+
+    toastAnimationFrameRef.current = window.requestAnimationFrame(() => {
+      toastAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        setIsToastVisible(true);
+        toastAnimationFrameRef.current = null;
+      });
+    });
+
     toastTimerRef.current = window.setTimeout(() => {
-      setToast(null);
       toastTimerRef.current = null;
-    }, 3000);
+      hideToast();
+    }, TOAST_DURATION);
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
 
     const formElement = event.currentTarget;
 
@@ -152,15 +207,29 @@ export function ContactMessageForm() {
     toast && typeof document !== "undefined"
       ? createPortal(
           <div
-            role={toast.type === "error" ? "alert" : "status"}
-            aria-live={toast.type === "error" ? "assertive" : "polite"}
-            className={`pointer-events-none fixed left-1/2 top-5 z-[9999] flex w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 items-center justify-center rounded-xl border px-5 py-3.5 text-center text-sm font-medium shadow-2xl backdrop-blur-xl ${
-              toast.type === "error"
-                ? "border-red-300/20 bg-[#351b27]/95 text-red-100"
-                : "border-emerald-300/20 bg-[#142b2a]/95 text-emerald-100"
-            }`}
+            className="pointer-events-none fixed inset-x-0 z-[9999] flex justify-center px-4 sm:px-6"
+            style={{
+              top: "max(1rem, env(safe-area-inset-top))",
+            }}
           >
-            <span className="w-full text-center">{toast.message}</span>
+            <div
+              role={toast.type === "error" ? "alert" : "status"}
+              aria-live={toast.type === "error" ? "assertive" : "polite"}
+              aria-atomic="true"
+              className={`pointer-events-auto flex min-h-11 w-full max-w-[calc(100vw-2rem)] items-center justify-center rounded-xl border px-4 py-3 text-center text-[13px] font-medium leading-5 shadow-lg backdrop-blur-xl transition-all duration-200 ease-out sm:min-h-12 sm:w-auto sm:max-w-[440px] sm:px-6 sm:py-3.5 sm:text-sm ${
+                toast.type === "error"
+                  ? "border-red-300/20 bg-[#26171d]/95 text-red-100 shadow-black/20"
+                  : "border-emerald-300/20 bg-[#14211f]/95 text-emerald-100 shadow-black/20"
+              } ${
+                isToastVisible
+                  ? "translate-y-0 scale-100 opacity-100"
+                  : "-translate-y-2 scale-[0.98] opacity-0"
+              }`}
+            >
+              <span className="block w-full text-center break-words">
+                {toast.message}
+              </span>
+            </div>
           </div>,
           document.body,
         )
