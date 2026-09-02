@@ -108,9 +108,13 @@ function parseSubmittedAt(value) {
     return null;
   }
 
-  const difference = Math.abs(Date.now() - date.getTime());
+  const now = Date.now();
+  const submittedTime = date.getTime();
 
-  if (difference > MAX_SUBMISSION_AGE_MS) {
+  if (
+    submittedTime > now + 5 * 60 * 1000 ||
+    now - submittedTime > MAX_SUBMISSION_AGE_MS
+  ) {
     return null;
   }
 
@@ -125,11 +129,45 @@ function formatReceivedAt(date) {
   }).format(date);
 }
 
+function getEmailConfig() {
+  const resendApiKey = process.env.RESEND_API_KEY?.trim() || "";
+
+  const receiverEmail = process.env.CONTACT_RECEIVER_EMAIL?.trim() || "";
+
+  const senderEmail = process.env.CONTACT_SENDER_EMAIL?.trim() || "";
+
+  const senderName =
+    cleanEmailHeader(process.env.CONTACT_SENDER_NAME || "Rifqi Portfolio") ||
+    "Rifqi Portfolio";
+
+  const missing = [];
+
+  if (!resendApiKey) {
+    missing.push("RESEND_API_KEY");
+  }
+
+  if (!receiverEmail) {
+    missing.push("CONTACT_RECEIVER_EMAIL");
+  }
+
+  if (!senderEmail) {
+    missing.push("CONTACT_SENDER_EMAIL");
+  }
+
+  return {
+    resendApiKey,
+    receiverEmail,
+    senderEmail,
+    senderName,
+    missing,
+  };
+}
+
 export async function POST(request) {
   try {
     const contentType = request.headers.get("content-type") || "";
 
-    if (!contentType.includes("application/json")) {
+    if (!contentType.toLowerCase().includes("application/json")) {
       return jsonError("Format permintaan tidak didukung.", 415);
     }
 
@@ -142,7 +180,9 @@ export async function POST(request) {
     }
 
     const name = String(body.name || "").trim();
-    const email = String(body.email || "").trim();
+    const email = String(body.email || "")
+      .trim()
+      .toLowerCase();
     const message = String(body.message || "").trim();
     const website = String(body.website || "").trim();
     const submissionId = String(body.submissionId || "").trim();
@@ -202,22 +242,34 @@ export async function POST(request) {
       );
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY?.trim();
+    const { resendApiKey, receiverEmail, senderEmail, senderName, missing } =
+      getEmailConfig();
 
-    const receiverEmail = process.env.CONTACT_RECEIVER_EMAIL?.trim();
+    if (missing.length > 0) {
+      console.error("CONTACT_EMAIL_CONFIG_MISSING:", missing);
 
-    const senderEmail = process.env.CONTACT_SENDER_EMAIL?.trim();
-
-    const senderName = cleanEmailHeader(
-      process.env.CONTACT_SENDER_NAME || "Rifqi Portfolio",
-    );
-
-    if (!resendApiKey || !receiverEmail || !senderEmail || !senderName) {
-      return jsonError("Konfigurasi layanan email belum lengkap.", 500);
+      return jsonError(
+        "Layanan email sedang tidak tersedia. Silakan coba lagi nanti.",
+        500,
+      );
     }
 
-    if (!isValidEmail(receiverEmail) || !isValidEmail(senderEmail)) {
-      return jsonError("Konfigurasi alamat email server tidak valid.", 500);
+    if (!isValidEmail(receiverEmail)) {
+      console.error("CONTACT_RECEIVER_EMAIL_INVALID");
+
+      return jsonError(
+        "Layanan email sedang tidak tersedia. Silakan coba lagi nanti.",
+        500,
+      );
+    }
+
+    if (!isValidEmail(senderEmail)) {
+      console.error("CONTACT_SENDER_EMAIL_INVALID");
+
+      return jsonError(
+        "Layanan email sedang tidak tersedia. Silakan coba lagi nanti.",
+        500,
+      );
     }
 
     const visitorName = cleanEmailHeader(name);
@@ -231,27 +283,44 @@ export async function POST(request) {
       receivedAt,
     });
 
-    const resendResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-        "Idempotency-Key": `portfolio-contact/${submissionId}`,
-      },
-      body: JSON.stringify({
-        from: `${senderName} <${senderEmail}>`,
-        to: [receiverEmail],
-        reply_to: email,
-        subject: `Pesan baru dari ${visitorName}`,
-        text: contactEmail.text,
-        html: contactEmail.html,
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
+    let resendResponse;
+
+    try {
+      resendResponse = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+          "Idempotency-Key": `portfolio-contact/${submissionId}`,
+        },
+        body: JSON.stringify({
+          from: `${senderName} <${senderEmail}>`,
+          to: [receiverEmail],
+          reply_to: email,
+          subject: `Pesan baru dari ${visitorName}`,
+          text: contactEmail.text,
+          html: contactEmail.html,
+        }),
+        signal: AbortSignal.timeout(10000),
+      });
+    } catch (error) {
+      if (error?.name === "TimeoutError" || error?.name === "AbortError") {
+        console.error("RESEND_REQUEST_TIMEOUT");
+
+        return jsonError(
+          "Layanan email membutuhkan waktu terlalu lama. Silakan coba lagi.",
+          504,
+        );
+      }
+
+      console.error("RESEND_REQUEST_ERROR:", error);
+
+      return jsonError("Pesan gagal dikirim. Silakan coba lagi nanti.", 502);
+    }
 
     const resendResult = await resendResponse.json().catch(() => null);
 
-    if (!resendResponse.ok || !resendResult?.id) {
+    if (!resendResponse.ok) {
       console.error("RESEND_EMAIL_ERROR:", {
         status: resendResponse.status,
         type: resendResult?.name || resendResult?.type || null,
@@ -261,10 +330,27 @@ export async function POST(request) {
           "Unknown Resend error",
       });
 
-      return jsonError(
-        "Pesan belum dapat dikirim. Silakan coba lagi nanti.",
-        502,
-      );
+      if (resendResponse.status === 401 || resendResponse.status === 403) {
+        return jsonError(
+          "Layanan email sedang tidak tersedia. Silakan coba lagi nanti.",
+          502,
+        );
+      }
+
+      if (resendResponse.status === 429) {
+        return jsonError(
+          "Layanan email sedang sibuk. Silakan coba lagi beberapa saat.",
+          503,
+        );
+      }
+
+      return jsonError("Pesan gagal dikirim. Silakan coba lagi nanti.", 502);
+    }
+
+    if (!resendResult?.id) {
+      console.error("RESEND_INVALID_SUCCESS_RESPONSE:", resendResult);
+
+      return jsonError("Pesan gagal dikirim. Silakan coba lagi nanti.", 502);
     }
 
     return NextResponse.json(
@@ -276,15 +362,6 @@ export async function POST(request) {
       },
     );
   } catch (error) {
-    if (error?.name === "TimeoutError" || error?.name === "AbortError") {
-      console.error("CONTACT_EMAIL_TIMEOUT");
-
-      return jsonError(
-        "Layanan email membutuhkan waktu terlalu lama. Silakan coba lagi.",
-        504,
-      );
-    }
-
     console.error("CONTACT_EMAIL_ERROR:", error);
 
     return jsonError("Pesan gagal dikirim. Silakan coba lagi nanti.", 500);
